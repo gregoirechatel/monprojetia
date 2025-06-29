@@ -1,13 +1,76 @@
-<!-- Fix pour Render déploiement 28/06 -->
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <title>Planning</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>Planning personnalisé</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            color: #222;
+            margin-bottom: 1rem;
+        }
+        #result {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            white-space: pre-wrap;
+        }
+        .back-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.7rem 1.2rem;
+            background-color: #ffcc00;
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
-  <h2>Voici ton planning généré :</h2>
-  <div>{{ planning|safe }}</div>
-  <a href="/">Retour à l'accueil</a>
+    <h1>Ton planning nutritionnel personnalisé</h1>
+    <div id="result">Chargement du planning en cours...</div>
+    <a class="back-button" href="/index.html">← Retour à l'accueil</a>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const params = new URLSearchParams(window.location.search);
+        const objectif = params.get("objectif");
+        const contraintes = params.get("contraintes");
+
+        if (!objectif || !contraintes) {
+            document.getElementById("result").innerHTML = "<p>Erreur : paramètres manquants.</p>";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("objectif", objectif);
+        formData.append("contraintes", contraintes);
+
+        try {
+            const response = await fetch("/generate", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.html) {
+                document.getElementById("result").innerHTML = data.html;
+            } else {
+                document.getElementById("result").innerHTML = "<p>Erreur IA : " + data.error + "</p>";
+            }
+        } catch (error) {
+            document.getElementById("result").innerHTML = "<p>Erreur réseau : " + error.message + "</p>";
+        }
+    });
+    </script>
 </body>
 </html>
