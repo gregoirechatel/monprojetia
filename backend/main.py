@@ -1,70 +1,65 @@
-# backend/main.py
-import os
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Form, Request
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
-from dotenv import load_dotenv
+import os
 
-load_dotenv()
-
+# Initialisation FastAPI
 app = FastAPI()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# Fichiers statiques et templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+# Initialisation client OpenAI
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-@app.get("/")
-async def read_root(request: Request):
+# Accueil
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-
-@app.get("/formulaire")
-async def get_form(request: Request):
+# Formulaire
+@app.get("/formulaire", response_class=HTMLResponse)
+async def show_form(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
-
-@app.post("/planning")
+# Traitement du formulaire et génération IA
+@app.post("/planning", response_class=HTMLResponse)
 async def generate_planning(
     request: Request,
-    nom: str = Form(...),
-    age: str = Form(...),
-    sexe: str = Form(...),
-    poids: str = Form(...),
-    taille: str = Form(...),
     objectif: str = Form(...),
-    contraintes: str = Form(...)
+    age: int = Form(...),
+    poids: float = Form(...),
+    taille: int = Form(...),
+    sexe: str = Form(...),
+    activite: str = Form(...)
 ):
-    try:
-        prompt = f"""Tu es un expert en nutrition. Crée un planning nutritionnel hebdomadaire simple et clair (petit-déjeuner, déjeuner, dîner) pour :
-- Nom : {nom}
-- Âge : {age}
-- Sexe : {sexe}
+    prompt = f"""
+Tu es un expert en nutrition. Crée un planning nutritionnel hebdomadaire pour :
+- Objectif : {objectif}
+- Âge : {age} ans
 - Poids : {poids} kg
 - Taille : {taille} cm
-- Objectif : {objectif}
-- Contraintes alimentaires : {contraintes}
-Donne uniquement le planning jour par jour, avec les plats, sans calories, sans justification, en format propre pour affichage HTML."""
+- Sexe : {sexe}
+- Niveau d’activité : {activite}
 
+Le planning doit contenir des repas simples, équilibrés et adaptés à cet utilisateur. Structure-le par jour, avec matin / midi / soir, et donne des grammages approximatifs.
+"""
+
+    try:
         response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "Tu es un expert en nutrition"},
-                {"role": "user", "content": prompt}
-            ]
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1500,
+            temperature=0.7
         )
-
-        output = response.choices[0].message.content.strip()
-
-        return templates.TemplateResponse("planning.html", {
-            "request": request,
-            "planning": output
-        })
-
+        result = response.choices[0].message.content
     except Exception as e:
-        return templates.TemplateResponse("planning.html", {
-            "request": request,
-            "planning": f"Erreur lors de la génération du planning : {e}"
-        })
+        result = f"Erreur lors de l’appel à l’API OpenAI : {e}"
+
+    return templates.TemplateResponse("planning.html", {
+        "request": request,
+        "planning": result
+    })
