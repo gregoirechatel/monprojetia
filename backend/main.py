@@ -2,7 +2,7 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-import openai
+from openai import OpenAI
 import os
 
 # Initialisation FastAPI
@@ -12,20 +12,17 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Configuration de l'API OpenAI
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Initialisation client OpenAI (nouvelle API >=1.0.0)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Accueil
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Formulaire
 @app.get("/formulaire", response_class=HTMLResponse)
 async def show_form(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
-# Traitement du formulaire
 @app.post("/planning", response_class=HTMLResponse)
 async def generate_planning(
     request: Request,
@@ -50,13 +47,13 @@ Structure-le par jour (lundi à dimanche), avec matin / midi / soir, et donne de
 """
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=1500,
             temperature=0.7
         )
-        result = response.choices[0].message["content"]
+        result = response.choices[0].message.content
     except Exception as e:
         result = f"Erreur lors de l’appel à l’API OpenAI : {e}"
 
