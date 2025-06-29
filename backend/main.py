@@ -2,8 +2,8 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from openai import OpenAI
 import os
+import requests
 
 # Initialisation FastAPI
 app = FastAPI()
@@ -12,17 +12,21 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Initialisation client OpenAI (nouvelle API >=1.0.0)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Récupération de la clé API depuis la variable d'environnement
+API_KEY = os.getenv("OPENROUTER_API_KEY")
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+# Accueil
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# Formulaire
 @app.get("/formulaire", response_class=HTMLResponse)
 async def show_form(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
+# Traitement du formulaire
 @app.post("/planning", response_class=HTMLResponse)
 async def generate_planning(
     request: Request,
@@ -46,16 +50,22 @@ Le planning doit contenir des repas simples, équilibrés et adaptés à cet uti
 Structure-le par jour (lundi à dimanche), avec matin / midi / soir, et donne des grammages approximatifs.
 """
 
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "model": "anthropic/claude-3-haiku",
+        "messages": [{"role": "user", "content": prompt}]
+    }
+
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1500,
-            temperature=0.7
-        )
-        result = response.choices[0].message.content
+        response = requests.post(API_URL, headers=headers, json=body)
+        response.raise_for_status()
+        result = response.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        result = f"Erreur lors de l’appel à l’API OpenAI : {e}"
+        result = f"Erreur lors de l’appel à l’API OpenRouter : {e}"
 
     return templates.TemplateResponse("planning.html", {
         "request": request,
