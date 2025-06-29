@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Coach IA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Assistant Nutrition IA</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Coach IA - Générateur de Planning</h1>
-    <form action="/planning" method="post">
-        <label>Objectif :</label>
-        <input type="text" name="objectif" required><br>
-        <label>Contraintes :</label>
-        <input type="text" name="contraintes"><br>
-        <button type="submit">Générer</button>
-    </form>
+    <div class="container">
+        <h1>👋 Bienvenue sur Mon Assistant Nutrition IA</h1>
+        <p>Ce site génère automatiquement un planning nutritionnel et sportif personnalisé, en fonction de ton profil.</p>
+
+        <div class="button-group">
+            <a href="/formulaire" class="button">Remplir le formulaire</a>
+            <a href="/planning" class="button secondary">Voir mon planning</a>
+        </div>
+
+        <footer>
+            <p>Développé avec ❤️ par Grégoire · IA by OpenAI</p>
+        </footer>
+    </div>
 </body>
 </html>
+
