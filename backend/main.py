@@ -1,55 +1,52 @@
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Form, Request
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import requests
+import openai
 import os
 
 app = FastAPI()
-
-# Dossier templates et static
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Clé OpenAI stockée sur Render dans les variables d'environnement
-api_key = os.getenv("OPENAI_API_KEY")
+# Clé API OpenAI (gérée via Render)
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.post("/planning")
-async def planning(
+@app.get("/formulaire", response_class=HTMLResponse)
+async def formulaire(request: Request):
+    return templates.TemplateResponse("formulaire.html", {"request": request})
+
+@app.post("/planning", response_class=HTMLResponse)
+async def generate_planning(
     request: Request,
-    nom: str = Form(...),
+    objectif: str = Form(...),
     age: int = Form(...),
-    sexe: str = Form(...),
     poids: float = Form(...),
-    taille: float = Form(...),
-    objectif: str = Form(...)
+    taille: int = Form(...),
+    sexe: str = Form(...),
+    activite: str = Form(...)
 ):
     prompt = (
-        f"Génère un planning alimentaire hebdomadaire pour {nom}, {sexe}, {age} ans, "
-        f"{poids} kg pour {taille} cm, ayant pour objectif : {objectif}. "
-        f"Propose des repas simples avec quantités précises pour chaque jour (matin, midi, soir)."
+        f"Crée un planning nutritionnel hebdomadaire personnalisé pour un(e) {sexe} de {age} ans, "
+        f"{taille} cm, {poids} kg, avec un niveau d'activité {activite} et comme objectif : {objectif}. "
+        f"Affiche seulement les repas (matin, midi, soir) pour chaque jour, sans calories visibles."
     )
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": "gpt-4",
-        "messages": [{"role": "user", "content": prompt}]
-    }
-
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-    data = response.json()
-
     try:
-        planning_text = data["choices"][0]["message"]["content"]
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7
+        )
+        output = response.choices[0].message["content"]
     except Exception as e:
-        planning_text = f"Erreur lors de la génération : {e}"
+        output = f"Erreur lors de la génération du planning : {e}"
 
-    return templates.TemplateResponse("planing.html", {"request": request, "planning": planning_text})
+    return templates.TemplateResponse("planning.html", {
+        "request": request,
+        "planning": output
+    })
