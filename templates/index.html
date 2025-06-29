@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Coach IA</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Coach IA - Générateur de Planning</h1>
+    <form action="/planning" method="post">
+        <label>Objectif :</label>
+        <input type="text" name="objectif" required><br>
+        <label>Contraintes :</label>
+        <input type="text" name="contraintes"><br>
+        <button type="submit">Générer</button>
+    </form>
+</body>
+</html>

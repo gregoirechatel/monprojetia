@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulaire CoachIA</title>
+</head>
+<body>
+    <h1>Remplis ce formulaire</h1>
+    <form action="/generate" method="post">
+        <label for="objectif">Ton objectif :</label><br>
+        <input type="text" id="objectif" name="objectif" required><br><br>
+
+        <label for="preferences">Préférences alimentaires :</label><br>
+        <input type="text" id="preferences" name="preferences"><br><br>
+
+        <label for="restrictions">Restrictions alimentaires :</label><br>
+        <input type="text" id="restrictions" name="restrictions"><br><br>
+
+        <button type="submit">Générer mon planning</button>
+    </form>
+
+    <br><a href="/">Retour à l’accueil</a>
+</body>
+</html>
