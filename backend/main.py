@@ -1,114 +1,120 @@
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-import requests
 import os
+from fastapi import FastAPI, Form
+from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import requests
 import json
+
+load_dotenv()
 
 app = FastAPI()
 
-# Configuration statiques & templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# 🔹 Page d’accueil
+# Route accueil
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def lire_index():
+    with open("templates/index.html", encoding="utf-8") as f:
+        return f.read()
 
-# 🔹 Formulaire
-@app.get("/formulaire", response_class=HTMLResponse)
-async def show_form(request: Request):
-    return templates.TemplateResponse("formulaire.html", {"request": request})
+# Route pour afficher planning déjà généré
+@app.get("/planning", response_class=HTMLResponse)
+def lire_planning():
+    with open("templates/planning.html", encoding="utf-8") as f:
+        return f.read()
 
-# 🔹 Génération du planning via IA + sauvegarde
-@app.post("/planning", response_class=HTMLResponse)
-async def generate_planning(
-    request: Request,
+# Route pour afficher liste déjà générée
+@app.get("/liste", response_class=HTMLResponse)
+def lire_liste():
+    with open("templates/liste.html", encoding="utf-8") as f:
+        return f.read()
+
+# Route POST pour générer planning + liste
+@app.post("/generer", response_class=HTMLResponse)
+def generer(
     objectif: str = Form(...),
     age: int = Form(...),
     poids: float = Form(...),
     taille: int = Form(...),
     sexe: str = Form(...),
-    activite: str = Form(...)
+    activite: str = Form(...),
+    email: str = Form(...)
 ):
     prompt = f"""
-Tu es un expert en nutrition. Crée un planning nutritionnel hebdomadaire pour :
-- Objectif : {objectif}
-- Âge : {age} ans
-- Poids : {poids} kg
-- Taille : {taille} cm
-- Sexe : {sexe}
-- Niveau d’activité : {activite}
+Tu es un expert en nutrition. Génère un planning nutritionnel hebdomadaire clair, structuré (matin, midi, soir), avec les grammages, des plats simples et un lien Marmiton si possible.
+Puis génère en-dessous une liste de courses complète avec les quantités en grammes, regroupée par type (féculents, légumes, protéines…).
 
-Le planning doit contenir des repas simples, équilibrés et adaptés à cet utilisateur.
-Structure-le par jour (lundi à dimanche), avec matin / midi / soir, et donne des grammages approximatifs.
+Données utilisateur :
+Objectif : {objectif}
+Âge : {age}
+Poids : {poids} kg
+Taille : {taille} cm
+Sexe : {sexe}
+Niveau d’activité : {activite}
 """
+
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "HTTP-Referer": "https://monprojetia.onrender.com",
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "model": "anthropic/claude-3-haiku",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ]
+    }
 
     try:
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "anthropic/claude-3-haiku",
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 1800
-            }
+            headers=headers,
+            json=body,
+            timeout=30
         )
+        response.raise_for_status()
+        resultat = response.json()["choices"][0]["message"]["content"]
 
-        data = response.json()
-        result = data['choices'][0]['message']['content']
+        planning_content = f"""
+        <html>
+        <head><meta charset="utf-8"><link rel="stylesheet" href="/static/style.css"></head>
+        <body>
+        <h1>Ton planning nutritionnel personnalisé</h1>
+        <pre>{resultat}</pre>
+        <a href="/">Retour à l'accueil</a>
+        </body>
+        </html>
+        """
 
-        # Sauvegarde du planning dans planning.json
-        with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-            json.dump(result, f, ensure_ascii=False, indent=2)
+        liste_content = f"""
+        <html>
+        <head><meta charset="utf-8"><link rel="stylesheet" href="/static/style.css"></head>
+        <body>
+        <h1>Ta liste de courses complète</h1>
+        <pre>{resultat}</pre>
+        <a href="/">Retour à l'accueil</a>
+        </body>
+        </html>
+        """
+
+        with open("templates/planning.html", "w", encoding="utf-8") as f:
+            f.write(planning_content)
+
+        with open("templates/liste.html", "w", encoding="utf-8") as f:
+            f.write(liste_content)
+
+        return planning_content
 
     except Exception as e:
-        result = f"Erreur lors de l’appel à l’IA : {e}"
-
-    return templates.TemplateResponse("planning.html", {
-        "request": request,
-        "planning": result
-    })
-
-# 🔹 Génération de la liste de courses
-@app.get("/liste", response_class=HTMLResponse)
-async def generate_liste(request: Request):
-    try:
-        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-            planning_data = f.read()
-
-        prompt = f"""
-Voici un planning nutritionnel :\n\n{planning_data}\n\n
-Fournis-moi une liste de courses hebdomadaire complète en fonction de ce planning. 
-Organise les ingrédients par catégorie (ex : Légumes, Féculents, Viandes…), avec les quantités approximatives en grammes. 
-La liste doit être claire, lisible et exploitable en supermarché.
-"""
-
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "anthropic/claude-3-haiku",
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 1000
-            }
+        return HTMLResponse(
+            content=f"<p>Erreur lors de l’appel à l’IA : {e}</p><a href='/'>Retour à l'accueil</a>",
+            status_code=500
         )
-
-        data = response.json()
-        liste_courses = data['choices'][0]['message']['content']
-
-    except Exception as e:
-        liste_courses = f"Erreur lors de la génération de la liste de courses : {e}"
-
-    return templates.TemplateResponse("liste.html", {
-        "request": request,
-        "liste": liste_courses
-    })
