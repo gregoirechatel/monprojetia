@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Planning Nutritionnel</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>Ton planning nutritionnel</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>📅 Ton planning nutritionnel personnalisé</h1>
-    <div class="planning-box">
-      <pre>{{ planning }}</pre>
+    <div class="container">
+        <h1>🍽️ Ton planning nutritionnel personnalisé</h1>
+        <p>Voici ton programme hebdomadaire généré par l’IA :</p>
+
+        <div class="planning-box">
+            <pre>{{ planning }}</pre>
+        </div>
+
+        <div class="button-group">
+            <a href="/" class="button">🏠 Retour à l’accueil</a>
+            <a href="/liste" class="button secondary">🛒 Générer ma liste de courses</a>
+        </div>
     </div>
-    <a href="/" class="back-link">← Retour à l'accueil</a>
-  </div>
 </body>
 </html>
