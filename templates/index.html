@@ -2,20 +2,108 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Accueil - Mon Coach Nutrition IA</title>
+    <title>Accueil - Coaching IA</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #f9f9f9, #dbeeff);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #004080;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 260px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #004080;
+            margin-bottom: 20px;
+        }
+
+        .card a {
+            text-decoration: none;
+            background-color: #004080;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .card a:hover {
+            background-color: #0066cc;
+        }
+
+        footer {
+            background-color: #e0e0e0;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: #555;
+            margin-top: 40px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">Bienvenue sur ton assistant nutritionnel</h1>
-        <p class="subtitle">Choisis une action :</p>
+    <header>
+        <h1>Bienvenue sur ton assistant nutrition et sport IA 🧠💪</h1>
+    </header>
 
-        <div class="button-grid">
-            <a href="/">Remplir le formulaire</a>
-            <a href="/planning" class="btn">📅 Voir le planning</a>
-            <a href="/liste" class="btn">🛒 Voir la liste de courses</a>
-            <a href="/training" class="button">Voir mon entraînement</a>
+    <div class="container">
+        <div class="card">
+            <h2>Remplir le formulaire</h2>
+            <a href="/formulaire">Accéder</a>
+        </div>
+
+        <div class="card">
+            <h2>Voir mon planning nutrition</h2>
+            <a href="/planning">Consulter</a>
+        </div>
+
+        <div class="card">
+            <h2>Voir ma liste de courses</h2>
+            <a href="/liste">Consulter</a>
+        </div>
+
+        <div class="card">
+            <h2>Voir mon entraînement</h2>
+            <a href="/training">Consulter</a>
         </div>
     </div>
+
+    <footer>
+        &copy; 2025 Coaching IA – Site personnel optimisé avec Claude 3 Haiku 🚀
+    </footer>
 </body>
 </html>

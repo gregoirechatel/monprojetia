@@ -7,15 +7,13 @@ from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import requests
 
-# Chargement des variables d'environnement
 load_dotenv()
 
-# Initialisation de FastAPI et des dossiers
 app = FastAPI()
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Configuration API
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 HEADERS = {
     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -23,12 +21,12 @@ HEADERS = {
 }
 CLAUDE_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Page d’accueil
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Traitement du formulaire complet
+
 @app.post("/generer", response_class=HTMLResponse)
 async def generer(
     request: Request,
@@ -38,18 +36,23 @@ async def generer(
     taille: int = Form(...),
     sexe: str = Form(...),
     activite: str = Form(...),
-    email: str = Form(...)
+    email: str = Form(...),
+    contraintes: str = Form(...)
 ):
-    # Prompt nutrition
     prompt = (
-        f"Tu es un expert en nutrition. Génére un planning nutritionnel simple, complet, avec grammages précis, "
-        f"matin-midi-soir pour 7 jours pour une personne de {age} ans, {poids} kg, {taille} cm, sexe {sexe}, "
-        f"objectif : {objectif}, activité : {activite}. Donne aussi la liste de courses correspondante avec grammages."
+        f"Tu es un expert en nutrition et sport. Génère :\n"
+        f"1. Un planning nutritionnel simple, clair et complet pour 7 jours, avec 3 repas par jour et les grammages précis. "
+        f"2. Une liste de courses associée avec les quantités exactes à acheter.\n"
+        f"3. Un planning d'entraînement hebdomadaire adapté à l’objectif ({objectif}), à une personne de {age} ans, "
+        f"{poids} kg, {taille} cm, sexe {sexe}, activité : {activite}, contraintes : {contraintes}.\n"
+        f"Rends le tout structuré, lisible, concret et réalisable pour un utilisateur lambda."
     )
 
     data = {
         "model": "anthropic/claude-3-haiku",
-        "messages": [{"role": "user", "content": prompt}]
+        "messages": [
+            {"role": "user", "content": prompt}
+        ]
     }
 
     try:
@@ -57,37 +60,25 @@ async def generer(
         result = response.json()
         contenu = result["choices"][0]["message"]["content"]
 
-        # Séparer planning et liste de courses
-        if "Liste de courses" in contenu:
-            parts = contenu.split("Liste de courses")
-            planning = parts[0].strip()
-            liste_courses = "Liste de courses" + parts[1].strip()
+        # Extraction manuelle (simplifiée ici pour test)
+        parts = contenu.split("Liste de courses")
+        planning = parts[0].strip()
+        liste_part = parts[1] if len(parts) > 1 else "Liste de courses indisponible"
+
+        if "Planning d'entraînement" in liste_part:
+            liste, training = liste_part.split("Planning d'entraînement", 1)
+            liste = "Liste de courses" + liste.strip()
+            training = "Planning d'entraînement" + training.strip()
         else:
-            planning = contenu
-            liste_courses = "Liste indisponible"
+            liste = "Liste de courses" + liste_part.strip()
+            training = "Planning d'entraînement indisponible"
 
-        # Générer aussi l'entraînement coordonné
-        prompt_training = (
-            f"Tu es coach sportif. Génére un planning d'entraînement hebdomadaire adapté à ce programme nutritionnel : "
-            f"{planning}. Prends en compte l'objectif {objectif}, l'activité physique {activite}, le sexe {sexe}, "
-            f"et les données corporelles : {poids} kg, {taille} cm, {age} ans. Donne 6 jours d'entraînement et 1 jour de repos."
-        )
-
-        data_training = {
-            "model": "anthropic/claude-3-haiku",
-            "messages": [{"role": "user", "content": prompt_training}]
-        }
-
-        response_training = requests.post(CLAUDE_URL, headers=HEADERS, json=data_training)
-        result_training = response_training.json()
-        training = result_training["choices"][0]["message"]["content"]
-
-        # Sauvegardes locales
+        # Sauvegardes
         with open("backend/data/planning.json", "w", encoding="utf-8") as f:
             json.dump({"planning": planning}, f, ensure_ascii=False, indent=2)
 
         with open("backend/data/liste.json", "w", encoding="utf-8") as f:
-            json.dump({"liste": liste_courses}, f, ensure_ascii=False, indent=2)
+            json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
         with open("backend/data/training.json", "w", encoding="utf-8") as f:
             json.dump({"training": training}, f, ensure_ascii=False, indent=2)
@@ -100,38 +91,35 @@ async def generer(
             "planning": f"Erreur lors de l’appel à l’IA : {str(e)}"
         })
 
-# Route pour planning
+
 @app.get("/planning", response_class=HTMLResponse)
 async def afficher_planning(request: Request):
     try:
         with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        planning = data["planning"]
+            planning = json.load(f)["planning"]
     except:
         planning = "Aucun planning trouvé. Veuillez d'abord en générer un."
 
     return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
 
-# Route pour liste de courses
+
 @app.get("/liste", response_class=HTMLResponse)
 async def afficher_liste(request: Request):
     try:
         with open("backend/data/liste.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        liste = data["liste"]
+            liste = json.load(f)["liste"]
     except:
         liste = "Aucune liste trouvée. Veuillez d'abord générer un planning."
 
     return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
 
-# Route pour entraînement
+
 @app.get("/training", response_class=HTMLResponse)
 async def afficher_training(request: Request):
     try:
         with open("backend/data/training.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        training = data["training"]
+            training = json.load(f)["training"]
     except:
-        training = "Aucun entraînement trouvé. Veuillez d'abord générer un planning."
+        training = "Aucun programme d'entraînement trouvé. Veuillez d'abord générer un planning."
 
     return templates.TemplateResponse("training.html", {"request": request, "training": training})
