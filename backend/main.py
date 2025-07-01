@@ -21,17 +21,14 @@ HEADERS = {
 }
 CLAUDE_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Page d'accueil
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Page formulaire (GET direct)
 @app.get("/formulaire", response_class=HTMLResponse)
 async def formulaire(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
-# Traitement du formulaire
 @app.post("/generer", response_class=HTMLResponse)
 async def generer(
     request: Request,
@@ -44,10 +41,11 @@ async def generer(
     email: str = Form(...)
 ):
     prompt = (
-        f"Tu es un expert en nutrition et sport. Génére un planning nutritionnel simple, complet, avec grammages précis, "
-        f"matin-midi-soir pour 7 jours pour une personne de {age} ans, {poids} kg, {taille} cm, sexe {sexe}, "
-        f"objectif : {objectif}, activité : {activite}. Donne aussi la liste de courses correspondante avec grammages. "
-        f"Puis génère un planning sportif hebdomadaire cohérent avec ce plan alimentaire et cet objectif."
+        f"Tu es un expert en nutrition et sport. Génère un PLANNING NUTRITIONNEL HEBDOMADAIRE (7 jours), "
+        f"avec 3 repas par jour (matin, midi, soir), simples, équilibrés, bien formatés, et avec les grammages. "
+        f"Profil utilisateur : {age} ans, {poids} kg, {taille} cm, sexe : {sexe}, objectif : {objectif}, activité : {activite}. "
+        f"Ensuite, génère une LISTE DE COURSES complète avec quantités hebdomadaires. "
+        f"Enfin, génère un PLANNING D'ENTRAÎNEMENT HEBDOMADAIRE cohérent avec l’objectif et la nutrition (7 jours, 1 repos)."
     )
 
     data = {
@@ -62,7 +60,6 @@ async def generer(
         result = response.json()
         contenu = result["choices"][0]["message"]["content"]
 
-        # Découpe
         if "Liste de courses" in contenu:
             planning_part, liste_part = contenu.split("Liste de courses", 1)
             planning = planning_part.strip()
@@ -71,34 +68,31 @@ async def generer(
             planning = contenu
             liste = "Aucune liste générée."
 
-        # Découper entraînement s’il est présent
-        if "Planning sportif" in planning:
-            nutrition_part, training_part = planning.split("Planning sportif", 1)
-            planning_nutrition = nutrition_part.strip()
+        if "Planning sportif" in liste:
+            liste_part, training_part = liste.split("Planning sportif", 1)
+            liste = liste_part.strip()
+            training = "Planning sportif" + training_part.strip()
+        elif "Planning sportif" in planning:
+            planning_part, training_part = planning.split("Planning sportif", 1)
+            planning = planning_part.strip()
             training = "Planning sportif" + training_part.strip()
         else:
-            planning_nutrition = planning
             training = "Aucun entraînement généré."
 
-        # Sauvegarde locale
         with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-            json.dump({"planning": planning_nutrition}, f, ensure_ascii=False, indent=2)
-
+            json.dump({"planning": planning}, f, ensure_ascii=False, indent=2)
         with open("backend/data/liste.json", "w", encoding="utf-8") as f:
             json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
-
         with open("backend/data/training.json", "w", encoding="utf-8") as f:
             json.dump({"training": training}, f, ensure_ascii=False, indent=2)
 
-        return templates.TemplateResponse("planning.html", {"request": request, "planning": planning_nutrition})
+        return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
 
     except Exception as e:
         return templates.TemplateResponse("planning.html", {
             "request": request,
             "planning": f"Erreur lors de l’appel à l’IA : {str(e)}"
         })
-
-# Page planning nutritionnel
 @app.get("/planning", response_class=HTMLResponse)
 async def afficher_planning(request: Request):
     try:
@@ -107,10 +101,9 @@ async def afficher_planning(request: Request):
         planning = data["planning"]
     except:
         planning = "Aucun planning trouvé. Veuillez d'abord en générer un."
-
     return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
 
-# Page liste de courses
+
 @app.get("/liste", response_class=HTMLResponse)
 async def afficher_liste(request: Request):
     try:
@@ -119,10 +112,9 @@ async def afficher_liste(request: Request):
         liste = data["liste"]
     except:
         liste = "Aucune liste trouvée. Veuillez d'abord générer un planning."
-
     return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
 
-# Page entraînement
+
 @app.get("/training", response_class=HTMLResponse)
 async def afficher_training(request: Request):
     try:
@@ -131,5 +123,4 @@ async def afficher_training(request: Request):
         training = data["training"]
     except:
         training = "Aucun programme d'entraînement trouvé. Veuillez d'abord générer un planning."
-
     return templates.TemplateResponse("training.html", {"request": request, "training": training})
