@@ -26,6 +26,10 @@ CLAUDE_URL = "https://openrouter.ai/api/v1/chat/completions"
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# Nouvelle route : affichage du formulaire depuis le bouton accueil
+@app.get("/formulaire", response_class=HTMLResponse)
+async def show_formulaire(request: Request):
+    return templates.TemplateResponse("formulaire.html", {"request": request})
 
 # Traitement du formulaire
 @app.post("/generer", response_class=HTMLResponse)
@@ -58,7 +62,6 @@ async def generer(
 
         contenu = result["choices"][0]["message"]["content"]
 
-        # Séparer planning et liste de courses
         if "Liste de courses" in contenu:
             parts = contenu.split("Liste de courses")
             planning = parts[0].strip()
@@ -67,7 +70,6 @@ async def generer(
             planning = contenu
             liste_courses = "Liste indisponible"
 
-        # Sauvegarde locale
         with open("backend/data/planning.json", "w", encoding="utf-8") as f:
             json.dump({"planning": planning}, f, ensure_ascii=False, indent=2)
 
@@ -82,7 +84,6 @@ async def generer(
             "planning": f"Erreur lors de l’appel à l’IA : {str(e)}"
         })
 
-
 # Page planning
 @app.get("/planning", response_class=HTMLResponse)
 async def afficher_planning(request: Request):
@@ -94,7 +95,6 @@ async def afficher_planning(request: Request):
         planning = "Aucun planning trouvé. Veuillez d'abord en générer un."
 
     return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
-
 
 # Page liste de courses
 @app.get("/liste", response_class=HTMLResponse)
