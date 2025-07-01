@@ -1,40 +1,44 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Formulaire</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>Formulaire Coaching</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>📝 Formulaire de Profil</h1>
-    <form action="/generer" method="post" class="form-grid">
-      <label for="objectif">Ton objectif :</label>
-      <input type="text" id="objectif" name="objectif" required>
+    <h1>Remplis ton profil</h1>
+    <form action="/generer" method="post">
+        <label for="objectif">Objectif :</label>
+        <input type="text" id="objectif" name="objectif" required><br>
 
-      <label for="age">Âge :</label>
-      <input type="number" id="age" name="age" required>
+        <label for="age">Âge :</label>
+        <input type="number" id="age" name="age" required><br>
 
-      <label for="poids">Poids (kg) :</label>
-      <input type="number" step="0.1" id="poids" name="poids" required>
+        <label for="poids">Poids (kg) :</label>
+        <input type="number" step="0.1" id="poids" name="poids" required><br>
 
-      <label for="taille">Taille (cm) :</label>
-      <input type="number" id="taille" name="taille" required>
+        <label for="taille">Taille (cm) :</label>
+        <input type="number" id="taille" name="taille" required><br>
 
-      <label for="sexe">Sexe :</label>
-      <select id="sexe" name="sexe" required>
-        <option value="Homme">Homme</option>
-        <option value="Femme">Femme</option>
-        <option value="Autre">Autre</option>
-      </select>
+        <label for="sexe">Sexe :</label>
+        <select id="sexe" name="sexe" required>
+            <option value="">--Choisir--</option>
+            <option value="Homme">Homme</option>
+            <option value="Femme">Femme</option>
+        </select><br>
 
-      <label for="activite">Niveau d'activité :</label>
-      <input type="text" id="activite" name="activite" required>
+        <label for="activite">Niveau d'activité :</label>
+        <select id="activite" name="activite" required>
+            <option value="">--Choisir--</option>
+            <option value="faible">Faible</option>
+            <option value="modérée">Modérée</option>
+            <option value="intense">Intense</option>
+        </select><br>
 
-      <button type="submit" class="submit-btn">🎯 Générer mon planning</button>
+        <label for="email">Adresse email :</label>
+        <input type="email" id="email" name="email" required><br>
+
+        <button type="submit">Générer mon planning</button>
     </form>
-    <a href="/" class="back-link">← Retour à l'accueil</a>
-  </div>
 </body>
 </html>
