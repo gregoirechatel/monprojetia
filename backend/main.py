@@ -5,30 +5,26 @@ from fastapi.staticfiles import StaticFiles
 import os
 import requests
 
-# Initialisation FastAPI
 app = FastAPI()
-
-# Fichiers statiques et templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Récupération de la clé API depuis la variable d'environnement
 API_KEY = os.getenv("OPENROUTER_API_KEY")
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
+HEADERS = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
 
-# Accueil
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Formulaire
 @app.get("/formulaire", response_class=HTMLResponse)
-async def show_form(request: Request):
+async def formulaire(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
-# Traitement du formulaire
 @app.post("/planning", response_class=HTMLResponse)
-async def generate_planning(
+async def planning(
     request: Request,
     objectif: str = Form(...),
     age: int = Form(...),
@@ -38,7 +34,7 @@ async def generate_planning(
     activite: str = Form(...)
 ):
     prompt = f"""
-Tu es un expert en nutrition. Crée un planning nutritionnel hebdomadaire pour :
+Tu es un expert en nutrition. Crée un planning hebdomadaire pour :
 - Objectif : {objectif}
 - Âge : {age} ans
 - Poids : {poids} kg
@@ -46,26 +42,20 @@ Tu es un expert en nutrition. Crée un planning nutritionnel hebdomadaire pour :
 - Sexe : {sexe}
 - Niveau d’activité : {activite}
 
-Le planning doit contenir des repas simples, équilibrés et adaptés à cet utilisateur.
-Structure-le par jour (lundi à dimanche), avec matin / midi / soir, et donne des grammages approximatifs.
+Le planning doit être structuré jour par jour (lundi à dimanche), matin, midi, soir, avec des idées de repas simples, grammages et liens si possible.
 """
 
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    body = {
+    data = {
         "model": "anthropic/claude-3-haiku",
-        "messages": [{"role": "user", "content": prompt}]
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 1500
     }
 
     try:
-        response = requests.post(API_URL, headers=headers, json=body)
-        response.raise_for_status()
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=HEADERS, json=data)
         result = response.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        result = f"Erreur lors de l’appel à l’API OpenRouter : {e}"
+        result = f"Erreur lors de l’appel à l’IA : {e}"
 
     return templates.TemplateResponse("planning.html", {
         "request": request,

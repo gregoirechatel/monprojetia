@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Mon Planning</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Planning Nutritionnel</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Ton planning nutritionnel personnalisé</h1>
-    <div>
-        <pre>{{ planning }}</pre>
+  <div class="container">
+    <h1>📅 Ton planning nutritionnel personnalisé</h1>
+    <div class="planning-box">
+      <pre>{{ planning }}</pre>
     </div>
-    <a href="/">Retour à l'accueil</a>
+    <a href="/" class="back-link">← Retour à l'accueil</a>
+  </div>
 </body>
 </html>

@@ -1,25 +1,32 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Assistant Nutrition IA</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mon Assistant Nutrition IA</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>👋 Bienvenue sur Mon Assistant Nutrition IA</h1>
-        <p>Ce site génère automatiquement un planning nutritionnel et sportif personnalisé, en fonction de ton profil.</p>
+  <header class="header">
+    <h1>🍽️ Mon Assistant Nutrition IA</h1>
+    <p>Génère ton planning nutritionnel et sportif personnalisé en quelques clics.</p>
+  </header>
 
-        <div class="button-group">
-            <a href="/formulaire" class="button">Remplir le formulaire</a>
-            <a href="/planning" class="button secondary">Voir mon planning</a>
-        </div>
-
-        <footer>
-            <p>Développé avec ❤️ par Grégoire · IA by OpenAI</p>
-        </footer>
+  <main class="container">
+    <div class="card-grid">
+      <a href="/formulaire" class="card">
+        <h2>📋 Remplir le Formulaire</h2>
+        <p>Entre tes informations personnelles pour générer un planning adapté.</p>
+      </a>
+      <a href="/planning" class="card">
+        <h2>📅 Voir le Planning</h2>
+        <p>Consulte ton planning nutritionnel et sportif généré par IA.</p>
+      </a>
     </div>
+  </main>
+
+  <footer>
+    <p>Fait avec ❤️ par Grégoire • IA propulsée par Claude via OpenRouter</p>
+  </footer>
 </body>
 </html>
-
