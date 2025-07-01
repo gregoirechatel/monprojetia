@@ -1,43 +1,36 @@
 import os
-from fastapi import FastAPI, Form
+import json
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import requests
-import json
 
 load_dotenv()
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
-# Route accueil
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+HEADERS = {
+    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+    "Content-Type": "application/json"
+}
+CLAUDE_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+# Page d'accueil
 @app.get("/", response_class=HTMLResponse)
-def lire_index():
-    with open("templates/index.html", encoding="utf-8") as f:
-        return f.read()
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# Route pour afficher planning déjà généré
-@app.get("/planning", response_class=HTMLResponse)
-def lire_planning():
-    with open("templates/planning.html", encoding="utf-8") as f:
-        return f.read()
 
-# Route pour afficher liste déjà générée
-@app.get("/liste", response_class=HTMLResponse)
-def lire_liste():
-    with open("templates/liste.html", encoding="utf-8") as f:
-        return f.read()
-
-# Route POST pour générer planning + liste
+# Traitement du formulaire
 @app.post("/generer", response_class=HTMLResponse)
-def generer(
+async def generer(
+    request: Request,
     objectif: str = Form(...),
     age: int = Form(...),
     poids: float = Form(...),
@@ -46,27 +39,13 @@ def generer(
     activite: str = Form(...),
     email: str = Form(...)
 ):
-    prompt = f"""
-Tu es un expert en nutrition. Génère un planning nutritionnel hebdomadaire clair, structuré (matin, midi, soir), avec les grammages, des plats simples et un lien Marmiton si possible.
-Puis génère en-dessous une liste de courses complète avec les quantités en grammes, regroupée par type (féculents, légumes, protéines…).
+    prompt = (
+        f"Tu es un expert en nutrition. Génére un planning nutritionnel simple, complet, avec grammages précis, "
+        f"matin-midi-soir pour 7 jours pour une personne de {age} ans, {poids} kg, {taille} cm, sexe {sexe}, "
+        f"objectif : {objectif}, activité : {activite}. Donne aussi la liste de courses correspondante avec grammages."
+    )
 
-Données utilisateur :
-Objectif : {objectif}
-Âge : {age}
-Poids : {poids} kg
-Taille : {taille} cm
-Sexe : {sexe}
-Niveau d’activité : {activite}
-"""
-
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "HTTP-Referer": "https://monprojetia.onrender.com",
-        "Content-Type": "application/json"
-    }
-
-    body = {
+    data = {
         "model": "anthropic/claude-3-haiku",
         "messages": [
             {"role": "user", "content": prompt}
@@ -74,47 +53,57 @@ Niveau d’activité : {activite}
     }
 
     try:
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json=body,
-            timeout=30
-        )
-        response.raise_for_status()
-        resultat = response.json()["choices"][0]["message"]["content"]
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        result = response.json()
 
-        planning_content = f"""
-        <html>
-        <head><meta charset="utf-8"><link rel="stylesheet" href="/static/style.css"></head>
-        <body>
-        <h1>Ton planning nutritionnel personnalisé</h1>
-        <pre>{resultat}</pre>
-        <a href="/">Retour à l'accueil</a>
-        </body>
-        </html>
-        """
+        contenu = result["choices"][0]["message"]["content"]
 
-        liste_content = f"""
-        <html>
-        <head><meta charset="utf-8"><link rel="stylesheet" href="/static/style.css"></head>
-        <body>
-        <h1>Ta liste de courses complète</h1>
-        <pre>{resultat}</pre>
-        <a href="/">Retour à l'accueil</a>
-        </body>
-        </html>
-        """
+        # Séparer planning et liste de courses
+        if "Liste de courses" in contenu:
+            parts = contenu.split("Liste de courses")
+            planning = parts[0].strip()
+            liste_courses = "Liste de courses" + parts[1].strip()
+        else:
+            planning = contenu
+            liste_courses = "Liste indisponible"
 
-        with open("templates/planning.html", "w", encoding="utf-8") as f:
-            f.write(planning_content)
+        # Sauvegarde locale
+        with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+            json.dump({"planning": planning}, f, ensure_ascii=False, indent=2)
 
-        with open("templates/liste.html", "w", encoding="utf-8") as f:
-            f.write(liste_content)
+        with open("backend/data/liste.json", "w", encoding="utf-8") as f:
+            json.dump({"liste": liste_courses}, f, ensure_ascii=False, indent=2)
 
-        return planning_content
+        return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
 
     except Exception as e:
-        return HTMLResponse(
-            content=f"<p>Erreur lors de l’appel à l’IA : {e}</p><a href='/'>Retour à l'accueil</a>",
-            status_code=500
-        )
+        return templates.TemplateResponse("planning.html", {
+            "request": request,
+            "planning": f"Erreur lors de l’appel à l’IA : {str(e)}"
+        })
+
+
+# Page planning
+@app.get("/planning", response_class=HTMLResponse)
+async def afficher_planning(request: Request):
+    try:
+        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        planning = data["planning"]
+    except:
+        planning = "Aucun planning trouvé. Veuillez d'abord en générer un."
+
+    return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
+
+
+# Page liste de courses
+@app.get("/liste", response_class=HTMLResponse)
+async def afficher_liste(request: Request):
+    try:
+        with open("backend/data/liste.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        liste = data["liste"]
+    except:
+        liste = "Aucune liste trouvée. Veuillez d'abord générer un planning."
+
+    return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
