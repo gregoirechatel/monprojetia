@@ -4,39 +4,72 @@
     <meta charset="UTF-8">
     <title>🍽️ Ton planning nutritionnel</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            background-color: #111;
+            color: #eee;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            padding: 30px;
+            text-align: center;
+        }
+        h1 {
+            color: #f5f5f5;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .planning-box {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+            white-space: pre-wrap;
+            text-align: left;
+            max-width: 1000px;
+            margin: 0 auto 30px auto;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            background-color: #ffc107;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s ease;
+        }
+        .button:hover {
+            background-color: #ff9800;
+        }
+        .secondary {
+            background-color: #444;
+            color: #fff;
+        }
+        .secondary:hover {
+            background-color: #666;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>🍽️ Ton planning nutritionnel personnalisé</h1>
         <p>Voici ton programme hebdomadaire généré par l’IA :</p>
 
-        {% if planning %}
-            {% set jours = planning.split('Jour ') %}
-            <div class="week-grid">
-                {% for bloc in jours[1:] %}
-                    {% set lignes = bloc.strip().split('\n') %}
-                    <div class="day-card">
-                        <h3>Jour {{ loop.index }}</h3>
-                        {% for moment in ['Matin', 'Midi', 'Soir'] %}
-                            <p><strong>{{ moment }}</strong><br>
-                            {% set contenu = '' %}
-                            {% for ligne in lignes %}
-                                {% if moment.lower() in ligne.lower() %}
-                                    {% set contenu = ligne.split(':')[-1].strip() %}
-                                {% endif %}
-                            {% endfor %}
-                            {{ contenu if contenu else 'Non précisé' }}</p>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>Aucun planning trouvé.</p>
-        {% endif %}
+        <div class="planning-box">
+            {{ planning }}
+        </div>
 
         <div class="button-group">
-            <a href="/" class="button">🏠 Retour à l’accueil</a>
-            <a href="/liste" class="button secondary">🛒 Générer ma liste de courses</a>
+            <a href="/" class="button">🏠 Accueil</a>
+            <a href="/liste" class="button secondary">🛒 Liste de courses</a>
+            <a href="/training" class="button secondary">🏋️‍♂️ Entraînement</a>
         </div>
     </div>
 </body>

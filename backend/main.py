@@ -21,17 +21,14 @@ HEADERS = {
 }
 CLAUDE_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Page d'accueil
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# Formulaire
 @app.get("/formulaire", response_class=HTMLResponse)
 async def formulaire(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
-# Traitement du formulaire et génération IA
 @app.post("/generer", response_class=HTMLResponse)
 async def generer(
     request: Request,
@@ -53,9 +50,7 @@ async def generer(
 
     data = {
         "model": "anthropic/claude-3-haiku",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ]
+        "messages": [{"role": "user", "content": prompt}]
     }
 
     try:
@@ -63,7 +58,7 @@ async def generer(
         result = response.json()
         contenu = result["choices"][0]["message"]["content"]
 
-        # Extraction des blocs
+        # Extraction
         planning = "Aucun planning généré"
         liste = "Aucune liste générée"
         training = "Aucun programme généré"
@@ -84,7 +79,6 @@ async def generer(
         else:
             planning = contenu
 
-        # Sauvegardes séparées
         with open("backend/data/planning.json", "w", encoding="utf-8") as f:
             json.dump({"planning": planning}, f, ensure_ascii=False, indent=2)
 
@@ -102,7 +96,6 @@ async def generer(
             "planning": f"Erreur IA : {str(e)}"
         })
 
-# Affichage du planning nutritionnel
 @app.get("/planning", response_class=HTMLResponse)
 async def afficher_planning(request: Request):
     try:
@@ -111,10 +104,8 @@ async def afficher_planning(request: Request):
         planning = data["planning"]
     except:
         planning = "Aucun planning trouvé."
-
     return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
 
-# Affichage de la liste de courses
 @app.get("/liste", response_class=HTMLResponse)
 async def afficher_liste(request: Request):
     try:
@@ -123,10 +114,8 @@ async def afficher_liste(request: Request):
         liste = data["liste"]
     except:
         liste = "Aucune liste trouvée."
-
     return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
 
-# Affichage du planning d'entraînement
 @app.get("/training", response_class=HTMLResponse)
 async def afficher_training(request: Request):
     try:
@@ -135,5 +124,4 @@ async def afficher_training(request: Request):
         training = data["training"]
     except:
         training = "Aucun planning d'entraînement trouvé."
-
     return templates.TemplateResponse("training.html", {"request": request, "training": training})
