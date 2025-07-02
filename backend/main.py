@@ -10,6 +10,7 @@ import requests
 load_dotenv()
 
 app = FastAPI()
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
@@ -21,14 +22,17 @@ HEADERS = {
 CLAUDE_URL = "https://openrouter.ai/api/v1/chat/completions"
 JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
+# Page d'accueil
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# Formulaire
 @app.get("/formulaire", response_class=HTMLResponse)
 async def formulaire(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
+# Génération complète du planning (7 requêtes)
 @app.post("/generer", response_class=HTMLResponse)
 async def generer(
     request: Request,
@@ -40,83 +44,99 @@ async def generer(
     activite: str = Form(...),
     email: str = Form(...)
 ):
-    planning = {}
-    liste_complete = ""
-    training = ""
+    plannings = {}
+    full_text = ""
 
     for jour in JOURS:
         prompt = (
-            f"Tu es un expert en nutrition. Génére uniquement le plan nutritionnel de {jour} (matin, midi, soir), "
-            f"pour une personne de {age} ans, {poids} kg, {taille} cm, sexe {sexe}, objectif {objectif}, activité {activite}. "
-            f"Donne les grammages exacts. Puis ajoute une courte liste de courses pour cette journée à la fin."
+            f"Tu es un expert en nutrition. Génère uniquement le planning nutritionnel pour {jour} : "
+            f"3 repas (matin, midi, soir) avec des plats simples, équilibrés et les grammages. "
+            f"Profil : {age} ans, {poids} kg, {taille} cm, sexe : {sexe}, objectif : {objectif}, activité : {activite}."
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
-            res = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-            content = res.json()["choices"][0]["message"]["content"]
-            planning[jour] = content
+            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+            result = response.json()
+            contenu = result["choices"][0]["message"]["content"]
+            plannings[jour] = contenu
+            full_text += contenu + "\n"
+        except:
+            plannings[jour] = f"Erreur lors de la génération de {jour}."
 
-            if "Liste de courses" in content:
-                liste_complete += content.split("Liste de courses", 1)[-1].strip() + "\n"
-
-        except Exception as e:
-            planning[jour] = f"Erreur IA pour {jour} : {e}"
-
-    # Générer training global (1 fois)
-    training_prompt = (
-        f"Tu es coach sportif. Génére un planning sportif hebdomadaire de 7 jours (avec 1 jour repos) adapté à : {objectif}, {activite}. "
-        f"Donne des explications claires jour par jour."
-    )
-    try:
-        res = requests.post(CLAUDE_URL, headers=HEADERS, json={
-            "model": "anthropic/claude-3-haiku",
-            "messages": [{"role": "user", "content": training_prompt}]
-        })
-        training = res.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        training = f"Erreur IA : {e}"
-
-    # Sauvegardes
+    # Sauvegarde du planning
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-        json.dump(planning, f, ensure_ascii=False, indent=2)
+        json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
+
+    # Génération de la liste de courses globale
+    liste_prompt = (
+        f"Génère la liste complète de courses pour les 7 jours de repas générés. "
+        f"Profil : {age} ans, {poids} kg, {taille} cm, sexe : {sexe}, objectif : {objectif}, activité : {activite}. "
+        f"Base-toi sur ce planning :\n{full_text}"
+    )
+    data_courses = {
+        "model": "anthropic/claude-3-haiku",
+        "messages": [{"role": "user", "content": liste_prompt}]
+    }
+
+    try:
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_courses)
+        result = response.json()
+        liste = result["choices"][0]["message"]["content"]
+    except:
+        liste = "Erreur lors de la génération de la liste."
+
     with open("backend/data/liste.json", "w", encoding="utf-8") as f:
-        json.dump({"liste": liste_complete}, f, ensure_ascii=False, indent=2)
-    with open("backend/data/training.json", "w", encoding="utf-8") as f:
-        json.dump({"training": training}, f, ensure_ascii=False, indent=2)
+        json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
-    return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
+    return RedirectResponse(url="/planning", status_code=303)
 
-@app.post("/regenerer/{jour}", response_class=HTMLResponse)
+# Re-générer une journée spécifique
+@app.get("/regenerer/{jour}", response_class=HTMLResponse)
 async def regenerer_jour(request: Request, jour: str):
+    if jour not in JOURS:
+        return RedirectResponse(url="/planning", status_code=303)
+
     try:
         with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-            planning = json.load(f)
+            data = json.load(f)
     except:
-        planning = {}
+        data = {"plannings": {}}
 
-    prompt = f"Génère uniquement le plan nutritionnel pour {jour} (matin, midi, soir), avec les grammages précis, simple et adapté."
-    data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+    prompt = (
+        f"Tu es un expert en nutrition. Génère uniquement le planning nutritionnel pour {jour} : "
+        f"3 repas (matin, midi, soir) équilibrés avec les grammages, pour un profil standard actif."
+    )
+    data_api = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+
     try:
-        res = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-        content = res.json()["choices"][0]["message"]["content"]
-        planning[jour] = content
-    except Exception as e:
-        planning[jour] = f"Erreur IA : {e}"
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_api)
+        result = response.json()
+        contenu = result["choices"][0]["message"]["content"]
+        data["plannings"][jour] = contenu
+    except:
+        data["plannings"][jour] = f"Erreur lors de la régénération de {jour}."
 
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-        json.dump(planning, f, ensure_ascii=False, indent=2)
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
-    return RedirectResponse("/planning", status_code=303)
+    return RedirectResponse(url="/planning", status_code=303)
 
+# Page planning
 @app.get("/planning", response_class=HTMLResponse)
 async def afficher_planning(request: Request):
     try:
         with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-            planning = json.load(f)
+            data = json.load(f)
+        plannings = data["plannings"]
     except:
-        planning = {j: "Non précisé" for j in JOURS}
-    return templates.TemplateResponse("planning.html", {"request": request, "planning": planning})
+        plannings = {}
 
+    return templates.TemplateResponse("planning.html", {
+        "request": request,
+        "plannings": plannings
+    })
+
+# Page liste de courses
 @app.get("/liste", response_class=HTMLResponse)
 async def afficher_liste(request: Request):
     try:
@@ -125,14 +145,5 @@ async def afficher_liste(request: Request):
         liste = data["liste"]
     except:
         liste = "Aucune liste trouvée."
-    return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
 
-@app.get("/training", response_class=HTMLResponse)
-async def afficher_training(request: Request):
-    try:
-        with open("backend/data/training.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        training = data["training"]
-    except:
-        training = "Aucun planning d'entraînement trouvé."
-    return templates.TemplateResponse("training.html", {"request": request, "training": training})
+    return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
