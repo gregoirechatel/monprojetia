@@ -20,7 +20,7 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 CLAUDE_URL = "https://openrouter.ai/api/v1/chat/completions"
-JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -42,13 +42,12 @@ async def generer(
     email: str = Form(...)
 ):
     plannings = {}
-    full_text = ""
 
     for jour in JOURS:
         prompt = (
-            f"Tu es un expert en nutrition. Génère uniquement le planning nutritionnel pour {jour} : "
-            f"3 repas (matin, midi, soir) avec des plats simples, équilibrés et les grammages. "
-            f"Profil : {age} ans, {poids} kg, {taille} cm, sexe : {sexe}, objectif : {objectif}, activité : {activite}."
+            f"Tu es un expert en nutrition. Génére un planning pour le {jour} : "
+            f"3 repas équilibrés (matin, midi, soir) avec les grammages, adaptés à un profil de "
+            f"{age} ans, {poids} kg, {taille} cm, sexe {sexe}, objectif {objectif}, activité {activite}."
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
@@ -56,24 +55,17 @@ async def generer(
             result = response.json()
             contenu = result["choices"][0]["message"]["content"]
             plannings[jour] = contenu
-            full_text += contenu + "\n"
         except:
-            plannings[jour] = f"Erreur lors de la génération de {jour}."
+            plannings[jour] = f"Erreur IA pour {jour}"
 
-    # Sauvegarde du planning nutritionnel
+    # Sauvegarde du planning
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
-    # Génération de la liste de courses
-    liste_prompt = (
-        f"Génère la liste complète de courses pour les 7 jours de repas générés. "
-        f"Profil : {age} ans, {poids} kg, {taille} cm, sexe : {sexe}, objectif : {objectif}, activité : {activite}. "
-        f"Base-toi sur ce planning :\n{full_text}"
-    )
-    data_courses = {
-        "model": "anthropic/claude-3-haiku",
-        "messages": [{"role": "user", "content": liste_prompt}]
-    }
+    # Génération liste de courses une seule fois pour toute la semaine
+    texte_complet = "\n".join(plannings[j] for j in JOURS if j in plannings)
+    prompt_liste = f"Génère une liste de courses complète avec grammages à partir de ce programme hebdomadaire :\n{texte_complet}"
+    data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt_liste}]}
 
     try:
         response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_courses)
@@ -85,28 +77,18 @@ async def generer(
     with open("backend/data/liste.json", "w", encoding="utf-8") as f:
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
-    # Génération du planning d'entraînement
-    sport_prompt = (
-        f"Tu es un coach sportif. Propose un planning d'entraînement pour 7 jours (1 jour de repos), "
-        f"adapté au profil : {age} ans, {poids} kg, {taille} cm, sexe : {sexe}, objectif : {objectif}, activité : {activite}. "
-        f"Ce planning doit être cohérent avec la nutrition hebdomadaire ci-dessous :\n{full_text}"
-    )
-    data_sport = {
-        "model": "anthropic/claude-3-haiku",
-        "messages": [{"role": "user", "content": sport_prompt}]
-    }
-
-    try:
-        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_sport)
-        result = response.json()
-        training = result["choices"][0]["message"]["content"]
-    except:
-        training = "Erreur lors de la génération du planning sportif."
-
-    with open("backend/data/training.json", "w", encoding="utf-8") as f:
-        json.dump({"training": training}, f, ensure_ascii=False, indent=2)
-
     return RedirectResponse(url="/planning", status_code=303)
+
+@app.get("/planning", response_class=HTMLResponse)
+async def afficher_planning(request: Request):
+    try:
+        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        plannings = data["plannings"]
+    except:
+        plannings = {}
+
+    return templates.TemplateResponse("planning.html", {"request": request, "plannings": plannings})
 
 @app.get("/regenerer/{jour}", response_class=HTMLResponse)
 async def regenerer_jour(request: Request, jour: str):
@@ -120,8 +102,8 @@ async def regenerer_jour(request: Request, jour: str):
         data = {"plannings": {}}
 
     prompt = (
-        f"Tu es un expert en nutrition. Génère uniquement le planning nutritionnel pour {jour} : "
-        f"3 repas (matin, midi, soir) équilibrés avec les grammages, pour un profil standard actif."
+        f"Tu es un expert en nutrition. Génére uniquement le planning nutritionnel pour {jour} : "
+        f"3 repas équilibrés avec grammages, pour un profil actif."
     )
     data_api = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
 
@@ -131,26 +113,28 @@ async def regenerer_jour(request: Request, jour: str):
         contenu = result["choices"][0]["message"]["content"]
         data["plannings"][jour] = contenu
     except:
-        data["plannings"][jour] = f"Erreur lors de la régénération de {jour}."
+        data["plannings"][jour] = f"Erreur lors de la régénération de {jour}"
 
+    # Sauvegarde
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    return RedirectResponse(url="/planning", status_code=303)
+    # Recalcul unique liste courses à partir des 7 jours
+    full_text = "\n".join(data["plannings"].get(j, "") for j in JOURS)
+    liste_prompt = f"Génère une liste de courses unique et complète pour la semaine entière :\n{full_text}"
+    data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": liste_prompt}]}
 
-@app.get("/planning", response_class=HTMLResponse)
-async def afficher_planning(request: Request):
     try:
-        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        plannings = data["plannings"]
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_courses)
+        result = response.json()
+        liste = result["choices"][0]["message"]["content"]
     except:
-        plannings = {}
+        liste = "Erreur liste courses"
 
-    return templates.TemplateResponse("planning.html", {
-        "request": request,
-        "plannings": plannings
-    })
+    with open("backend/data/liste.json", "w", encoding="utf-8") as f:
+        json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
+
+    return RedirectResponse(url="/planning", status_code=303)
 
 @app.get("/liste", response_class=HTMLResponse)
 async def afficher_liste(request: Request):
@@ -162,14 +146,3 @@ async def afficher_liste(request: Request):
         liste = "Aucune liste trouvée."
 
     return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
-
-@app.get("/training", response_class=HTMLResponse)
-async def afficher_training(request: Request):
-    try:
-        with open("backend/data/training.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        training = data["training"]
-    except:
-        training = "Aucun planning d'entraînement trouvé."
-
-    return templates.TemplateResponse("training.html", {"request": request, "training": training})
