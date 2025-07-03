@@ -4,6 +4,72 @@
     <meta charset="UTF-8">
     <title>Liste de courses</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #111;
+            color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 30px;
+            background: #1c1c1c;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #ffe600, #ffcc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            text-align: center;
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .shopping-list {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 12px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-family: Consolas, monospace;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.03);
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #111;
+            background-color: #ffe600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: #ffcc00;
+        }
+
+        .center-button {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -14,7 +80,9 @@
             <pre>{{ liste }}</pre>
         </div>
 
-        <a href="/" class="button">🏠 Retour à l’accueil</a>
+        <div class="center-button">
+            <a href="/" class="button">🏠 Retour à l’accueil</a>
+        </div>
     </div>
 </body>
 </html>
