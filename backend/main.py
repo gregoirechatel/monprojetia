@@ -45,7 +45,7 @@ async def generer(
 
     for jour in JOURS:
         prompt = (
-            f"Tu es un expert en nutrition. Génére un planning pour le {jour} : "
+            f"Tu es un expert en nutrition. Génére un planning alimentaire pour le {jour} : "
             f"3 repas équilibrés (matin, midi, soir) avec les grammages, adaptés à un profil de "
             f"{age} ans, {poids} kg, {taille} cm, sexe {sexe}, objectif {objectif}, activité {activite}."
         )
@@ -58,13 +58,15 @@ async def generer(
         except:
             plannings[jour] = f"Erreur IA pour {jour}"
 
-    # Sauvegarde du planning
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
-    # Génération liste de courses une seule fois pour toute la semaine
-    texte_complet = "\n".join(plannings[j] for j in JOURS if j in plannings)
-    prompt_liste = f"Génère une liste de courses complète avec grammages à partir de ce programme hebdomadaire :\n{texte_complet}"
+    texte_complet = "\n".join(plannings.values())
+    prompt_liste = (
+        "Génère une SEULE liste de courses hebdomadaire complète, concise, avec les grammages, "
+        "regroupée par type d'ingrédient (ex: viandes, légumes, produits laitiers, féculents). "
+        "NE FOURNIS PAS une liste jour par jour. Voici le planning :\n" + texte_complet
+    )
     data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt_liste}]}
 
     try:
@@ -115,13 +117,14 @@ async def regenerer_jour(request: Request, jour: str):
     except:
         data["plannings"][jour] = f"Erreur lors de la régénération de {jour}"
 
-    # Sauvegarde
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    # Recalcul unique liste courses à partir des 7 jours
     full_text = "\n".join(data["plannings"].get(j, "") for j in JOURS)
-    liste_prompt = f"Génère une liste de courses unique et complète pour la semaine entière :\n{full_text}"
+    liste_prompt = (
+        "Génère UNE SEULE liste de courses pour toute la semaine avec les grammages. "
+        "Ne fais JAMAIS une liste jour par jour. Voici le planning :\n" + full_text
+    )
     data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": liste_prompt}]}
 
     try:

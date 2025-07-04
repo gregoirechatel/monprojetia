@@ -2,19 +2,19 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Liste de courses</title>
+    <title>🛒 Liste de courses</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🛒 Ta liste de courses hebdomadaire</h1>
-        <p>Voici les ingrédients nécessaires pour suivre ton planning nutritionnel personnalisé :</p>
+        <h1>🛒 Liste de courses hebdomadaire</h1>
+        <p>Voici la liste complète d’ingrédients, générée automatiquement à partir de ton planning personnalisé :</p>
 
-        <div class="shopping-list">
-            <pre>{{ liste }}</pre>
+        <div class="bloc">
+            <pre class="liste-content">{{ liste }}</pre>
         </div>
 
-        <div class="button-group" style="text-align: center; margin-top: 40px;">
+        <div class="button-group">
             <a href="/" class="button">🏠 Retour à l’accueil</a>
             <a href="/planning" class="button secondary">📅 Voir le planning</a>
         </div>
