@@ -58,8 +58,7 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
 async def generer_liste_courses(plannings: dict):
     texte_complet = "\n".join(plannings.values())
     prompt_liste = (
-        "À partir de ce planning nutritionnel hebdomadaire, génère une seule et unique liste de courses "
-        "pour toute la semaine avec quantités précises. Ne fais pas de liste par jour.\n" + texte_complet
+        "Génère une seule liste de courses pour toute la semaine (sans séparer par jour) avec quantités et grammages précis.\n" + texte_complet
     )
     data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt_liste}]}
     try:
@@ -98,8 +97,8 @@ async def coach_action(request: Request, message: str = Form(...)):
     jour_cible = next((j for j in JOURS if j.lower() in message.lower()), None)
     message_lower = message.lower()
 
-    if jour_cible and any(mot in message_lower for mot in ["régénère", "recrée", "modifie"]):
-        prompt = f"Génère un nouveau planning nutritionnel pour {jour_cible}, 3 repas avec grammages, simples et efficaces."
+    if jour_cible and any(mot in message_lower for mot in ["régénère", "recrée", "modifie", "change"]):
+        prompt = f"Génère un nouveau planning nutritionnel simple mais efficace pour {jour_cible}, structuré en 3 repas avec grammages."
         data_api = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
             response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_api)
@@ -112,15 +111,11 @@ async def coach_action(request: Request, message: str = Form(...)):
                 json.dump(data_planning, f, ensure_ascii=False, indent=2)
 
             await generer_liste_courses(data_planning["plannings"])
-            reponse = f"✅ Le jour {jour_cible} a été régénéré avec succès. Liste de courses mise à jour."
+            reponse = f"✅ Le jour {jour_cible} a été régénéré. Planning et liste mis à jour."
         except Exception as e:
-            reponse = f"Erreur : {e}"
+            reponse = f"Erreur IA lors de la régénération : {str(e)}"
     else:
-        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": message}]}
-        try:
-            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-            reponse = response.json()["choices"][0]["message"]["content"]
-        except:
-            reponse = "Erreur IA lors de la réponse."
+        reponse = ("Je suis un coach IA connecté à ton programme. Dis-moi par exemple : 'régénère le jeudi', "
+                   "ou 'simplifie ma séance de demain'.")
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
