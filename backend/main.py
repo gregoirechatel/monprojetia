@@ -119,34 +119,43 @@ async def coach_page(request: Request):
 
 @app.post("/coach", response_class=HTMLResponse)
 async def coach_action(request: Request, message: str = Form(...)):
-    jour_cible = next((j for j in JOURS if j.lower() in message.lower()), None)
     message_lower = message.lower()
+    jour_cible = next((j for j in JOURS if j.lower() in message_lower), None)
     reponse = ""
 
     try:
-        # Requête IA de base
+        # Prompt intelligent unique
+        prompt = (
+            "Tu es un expert en nutrition. Voici une demande utilisateur :\n"
+            f"{message}\n\n"
+            "Interprète-la et génère un nouveau planning alimentaire uniquement pour le jour concerné. "
+            "Ce planning doit être structuré en 3 repas (matin, midi, soir) avec des aliments concrets et grammages. "
+            "Ne parle pas de motivation ni d'organisation de vie. Fournis juste un texte brut du planning."
+        )
+
         data = {
             "model": "anthropic/claude-3-haiku",
-            "messages": [{"role": "user", "content": message}]
+            "messages": [{"role": "user", "content": prompt}]
         }
-        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-        result = response.json()
-        contenu_ia = result["choices"][0]["message"]["content"]
 
-        # Si l'utilisateur demande une action sur un jour précis
-        if jour_cible and any(m in message_lower for m in ["régénère", "recrée", "modifie", "change"]):
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        contenu = response.json()["choices"][0]["message"]["content"]
+
+        if jour_cible:
             with open("backend/data/planning.json", "r", encoding="utf-8") as f:
                 data_json = json.load(f)
-            data_json["plannings"][jour_cible] = contenu_ia
+
+            data_json["plannings"][jour_cible] = contenu
+
             with open("backend/data/planning.json", "w", encoding="utf-8") as f:
                 json.dump(data_json, f, ensure_ascii=False, indent=2)
 
             await generer_liste_courses(data_json["plannings"])
-            reponse = f"✅ Planning du {jour_cible} mis à jour.\n\n{contenu_ia}"
+            reponse = f"✅ Le planning du {jour_cible} a été mis à jour.\n\n{contenu}"
         else:
-            reponse = f"🤖 Réponse du coach IA :\n\n{contenu_ia}"
+            reponse = f"🤖 Réponse IA :\n\n{contenu}"
 
     except Exception as e:
-        reponse = f"❌ Erreur : {str(e)}"
+        reponse = f"❌ Erreur IA : {str(e)}"
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
