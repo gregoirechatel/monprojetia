@@ -45,7 +45,7 @@ async def generer(
 
     for jour in JOURS:
         prompt = (
-            f"Tu es un expert en nutrition. Génére un planning alimentaire pour le {jour} : "
+            f"Tu es un expert en nutrition. Génére un planning pour le {jour} : "
             f"3 repas équilibrés (matin, midi, soir) avec les grammages, adaptés à un profil de "
             f"{age} ans, {poids} kg, {taille} cm, sexe {sexe}, objectif {objectif}, activité {activite}."
         )
@@ -58,14 +58,15 @@ async def generer(
         except:
             plannings[jour] = f"Erreur IA pour {jour}"
 
+    # Sauvegarde du planning
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
+    # Génération liste de courses globale
     texte_complet = "\n".join(plannings.values())
     prompt_liste = (
-        "Génère une SEULE liste de courses hebdomadaire complète, concise, avec les grammages, "
-        "regroupée par type d'ingrédient (ex: viandes, légumes, produits laitiers, féculents). "
-        "NE FOURNIS PAS une liste jour par jour. Voici le planning :\n" + texte_complet
+        f"Génère une liste de courses complète pour toute la semaine à partir de ce planning. "
+        f"Ne regroupe surtout pas les courses par jour, mais bien une seule fois avec les quantités :\n{texte_complet}"
     )
     data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt_liste}]}
 
@@ -117,13 +118,15 @@ async def regenerer_jour(request: Request, jour: str):
     except:
         data["plannings"][jour] = f"Erreur lors de la régénération de {jour}"
 
+    # Sauvegarde
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+    # Recalcul liste de courses unique pour la semaine
     full_text = "\n".join(data["plannings"].get(j, "") for j in JOURS)
     liste_prompt = (
-        "Génère UNE SEULE liste de courses pour toute la semaine avec les grammages. "
-        "Ne fais JAMAIS une liste jour par jour. Voici le planning :\n" + full_text
+        f"Voici le planning nutritionnel sur 7 jours. Génère une seule liste de courses hebdomadaire avec tous les ingrédients "
+        f"et grammages regroupés sans doublons. Ne jamais faire une liste par jour :\n{full_text}"
     )
     data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": liste_prompt}]}
 
@@ -149,3 +152,36 @@ async def afficher_liste(request: Request):
         liste = "Aucune liste trouvée."
 
     return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
+
+@app.get("/training", response_class=HTMLResponse)
+async def afficher_training(request: Request):
+    try:
+        with open("backend/data/training.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        training = data["training"]
+    except:
+        training = "Aucun planning d'entraînement trouvé."
+
+    return templates.TemplateResponse("training.html", {"request": request, "training": training})
+
+@app.get("/coach", response_class=HTMLResponse)
+async def get_coach(request: Request):
+    return templates.TemplateResponse("coach.html", {"request": request})
+
+@app.post("/coach", response_class=HTMLResponse)
+async def post_coach(request: Request, message: str = Form(...)):
+    prompt = (
+        f"Tu es un coach personnel IA ultra compétent en nutrition, sport et bien-être. "
+        f"Voici une question ou instruction de ton client : {message}. "
+        f"Réponds clairement, adapte si besoin le planning (ex: changer jeudi, raccourcir une séance)."
+    )
+    data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+
+    try:
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        result = response.json()
+        reponse = result["choices"][0]["message"]["content"]
+    except:
+        reponse = "Erreur IA lors de la réponse."
+
+    return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
