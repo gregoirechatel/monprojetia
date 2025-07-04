@@ -4,105 +4,20 @@
     <meta charset="UTF-8">
     <title>Coach IA</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #eef5ff, #d3e5ff);
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #004080;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            color: #004080;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            resize: vertical;
-            font-size: 16px;
-        }
-
-        button {
-            background-color: #004080;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #0066cc;
-        }
-
-        .response-box {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f2f7ff;
-            border-left: 5px solid #004080;
-            border-radius: 8px;
-            white-space: pre-wrap;
-        }
-
-        .back {
-            margin-top: 30px;
-            display: inline-block;
-            color: #004080;
-            text-decoration: none;
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
-    <header>
-        <h1>💬 Ton coach IA personnel</h1>
-    </header>
-
     <div class="container">
+        <h1>💬 Parle à ton coach personnel</h1>
         <form action="/coach" method="post">
-            <label for="message">Pose une question ou donne une instruction :</label>
-            <textarea name="message" id="message" required placeholder="Exemples : 'Régénère le jeudi' ou 'Raccourcis ma séance de samedi'..."></textarea>
+            <input type="text" name="message" placeholder="Pose une question ou donne un ordre..." required style="width: 70%; padding: 10px;">
             <button type="submit">Envoyer</button>
         </form>
 
-        {% if reponse %}
-        <div class="response-box">
-            <strong>Réponse du coach IA :</strong><br>
-            {{ reponse }}
+        <div style="margin-top: 30px; background: #f0f8ff; padding: 20px; border-radius: 8px;">
+            <pre>{{ reponse }}</pre>
         </div>
-        {% endif %}
 
-        <a href="/" class="back">🏠 Retour à l’accueil</a>
+        <a href="/" class="button">🏠 Retour à l’accueil</a>
     </div>
 </body>
 </html>
