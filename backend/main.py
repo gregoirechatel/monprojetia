@@ -88,6 +88,31 @@ async def afficher_liste(request: Request):
         liste = "Aucune liste trouvée."
     return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
 
+@app.get("/regenerer/{jour}", response_class=HTMLResponse)
+async def regenerer_jour(request: Request, jour: str):
+    if jour not in JOURS:
+        return RedirectResponse(url="/planning", status_code=303)
+
+    prompt = f"Génère uniquement le planning nutritionnel pour {jour}, structuré en 3 repas équilibrés avec grammages précis."
+    data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+
+    try:
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        contenu = response.json()["choices"][0]["message"]["content"]
+
+        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+            data_json = json.load(f)
+        data_json["plannings"][jour] = contenu
+
+        with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+            json.dump(data_json, f, ensure_ascii=False, indent=2)
+
+        await generer_liste_courses(data_json["plannings"])
+    except:
+        pass
+
+    return RedirectResponse(url="/planning", status_code=303)
+
 @app.get("/coach", response_class=HTMLResponse)
 async def coach_page(request: Request):
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": ""})
@@ -98,24 +123,31 @@ async def coach_action(request: Request, message: str = Form(...)):
     message_lower = message.lower()
 
     if jour_cible and any(mot in message_lower for mot in ["régénère", "recrée", "modifie", "change"]):
-        prompt = f"Génère un nouveau planning nutritionnel simple mais efficace pour {jour_cible}, structuré en 3 repas avec grammages."
-        data_api = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+        prompt = f"Génère un planning nutritionnel complet pour {jour_cible} : 3 repas équilibrés avec grammages précis, adaptés à un profil actif."
+        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+
         try:
-            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_api)
+            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
             contenu = response.json()["choices"][0]["message"]["content"]
 
             with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-                data_planning = json.load(f)
-            data_planning["plannings"][jour_cible] = contenu
-            with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-                json.dump(data_planning, f, ensure_ascii=False, indent=2)
+                data_json = json.load(f)
+            data_json["plannings"][jour_cible] = contenu
 
-            await generer_liste_courses(data_planning["plannings"])
-            reponse = f"✅ Le jour {jour_cible} a été régénéré. Planning et liste mis à jour."
+            with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+                json.dump(data_json, f, ensure_ascii=False, indent=2)
+
+            await generer_liste_courses(data_json["plannings"])
+            reponse = f"✅ Le planning de {jour_cible} a été mis à jour avec succès !"
         except Exception as e:
-            reponse = f"Erreur IA lors de la régénération : {str(e)}"
+            reponse = f"❌ Erreur lors de la régénération : {str(e)}"
     else:
-        reponse = ("Je suis un coach IA connecté à ton programme. Dis-moi par exemple : 'régénère le jeudi', "
-                   "ou 'simplifie ma séance de demain'.")
+        reponse = (
+            "Je suis ton coach IA ! ✨\n\n"
+            "Essaye par exemple :\n"
+            "- 'régénère le jeudi'\n"
+            "- 'modifie le lundi'\n"
+            "Et je mettrai à jour ton planning automatiquement 💡"
+        )
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
