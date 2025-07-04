@@ -30,16 +30,10 @@ async def formulaire(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
 @app.post("/generer", response_class=HTMLResponse)
-async def generer(
-    request: Request,
-    objectif: str = Form(...),
-    age: int = Form(...),
-    poids: float = Form(...),
-    taille: int = Form(...),
-    sexe: str = Form(...),
-    activite: str = Form(...),
-    email: str = Form(...)
-):
+async def generer(request: Request, objectif: str = Form(...), age: int = Form(...),
+    poids: float = Form(...), taille: int = Form(...), sexe: str = Form(...),
+    activite: str = Form(...), email: str = Form(...)):
+
     plannings = {}
     for jour in JOURS:
         prompt = (
@@ -58,7 +52,10 @@ async def generer(
     with open("backend/data/planning.json", "w", encoding="utf-8") as f:
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
-    # Liste unique pour toute la semaine
+    await generer_liste_courses(plannings)
+    return RedirectResponse(url="/planning", status_code=303)
+
+async def generer_liste_courses(plannings: dict):
     texte_complet = "\n".join(plannings.values())
     prompt_liste = (
         "À partir de ce planning nutritionnel hebdomadaire, génère une seule et unique liste de courses "
@@ -74,14 +71,11 @@ async def generer(
     with open("backend/data/liste.json", "w", encoding="utf-8") as f:
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
-    return RedirectResponse(url="/planning", status_code=303)
-
 @app.get("/planning", response_class=HTMLResponse)
 async def afficher_planning(request: Request):
     try:
         with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        plannings = data["plannings"]
+            plannings = json.load(f)["plannings"]
     except:
         plannings = {}
     return templates.TemplateResponse("planning.html", {"request": request, "plannings": plannings})
@@ -90,8 +84,7 @@ async def afficher_planning(request: Request):
 async def afficher_liste(request: Request):
     try:
         with open("backend/data/liste.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-        liste = data["liste"]
+            liste = json.load(f)["liste"]
     except:
         liste = "Aucune liste trouvée."
     return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
@@ -102,40 +95,32 @@ async def coach_page(request: Request):
 
 @app.post("/coach", response_class=HTMLResponse)
 async def coach_action(request: Request, message: str = Form(...)):
-    # Analyse du message
     jour_cible = next((j for j in JOURS if j.lower() in message.lower()), None)
+    message_lower = message.lower()
 
-    if "régénère" in message.lower() and jour_cible:
+    if jour_cible and any(mot in message_lower for mot in ["régénère", "recrée", "modifie"]):
         prompt = f"Génère un nouveau planning nutritionnel pour {jour_cible}, 3 repas avec grammages, simples et efficaces."
-        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+        data_api = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
-            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-            nouveau = response.json()["choices"][0]["message"]["content"]
+            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_api)
+            contenu = response.json()["choices"][0]["message"]["content"]
+
             with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-                planning_data = json.load(f)
-            planning_data["plannings"][jour_cible] = nouveau
+                data_planning = json.load(f)
+            data_planning["plannings"][jour_cible] = contenu
             with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-                json.dump(planning_data, f, ensure_ascii=False, indent=2)
+                json.dump(data_planning, f, ensure_ascii=False, indent=2)
 
-            # Mise à jour automatique de la liste
-            full_text = "\n".join(planning_data["plannings"].get(j, "") for j in JOURS)
-            liste_prompt = "Fais une seule liste de courses hebdomadaire basée sur ceci :\n" + full_text
-            data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": liste_prompt}]}
-            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data_courses)
-            liste = response.json()["choices"][0]["message"]["content"]
-            with open("backend/data/liste.json", "w", encoding="utf-8") as f:
-                json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
-
-            reponse = f"✅ Le planning du {jour_cible} a été régénéré et la liste de courses mise à jour."
+            await generer_liste_courses(data_planning["plannings"])
+            reponse = f"✅ Le jour {jour_cible} a été régénéré avec succès. Liste de courses mise à jour."
         except Exception as e:
-            reponse = f"Erreur : {str(e)}"
+            reponse = f"Erreur : {e}"
     else:
-        # Réponse générique de coach
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": message}]}
         try:
             response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
             reponse = response.json()["choices"][0]["message"]["content"]
         except:
-            reponse = "Erreur IA."
+            reponse = "Erreur IA lors de la réponse."
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
