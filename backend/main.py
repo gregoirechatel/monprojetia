@@ -119,47 +119,34 @@ async def coach_page(request: Request):
 
 @app.post("/coach", response_class=HTMLResponse)
 async def coach_action(request: Request, message: str = Form(...)):
-    jour_cible = None
-    for jour in JOURS:
-        if jour.lower() in message.lower():
-            jour_cible = jour
-            break
-
+    jour_cible = next((j for j in JOURS if j.lower() in message.lower()), None)
     message_lower = message.lower()
+    reponse = ""
 
-    if jour_cible and any(mot in message_lower for mot in ["régénère", "recrée", "modifie", "change"]):
-        prompt = (
-            f"Génère un planning nutritionnel complet et clair pour {jour_cible} : "
-            f"3 repas équilibrés (matin, midi, soir) avec grammages précis, adaptés à un profil actif."
-        )
+    try:
+        # Requête IA de base
         data = {
             "model": "anthropic/claude-3-haiku",
-            "messages": [{"role": "user", "content": prompt}]
+            "messages": [{"role": "user", "content": message}]
         }
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        result = response.json()
+        contenu_ia = result["choices"][0]["message"]["content"]
 
-        try:
-            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-            response.raise_for_status()
-            contenu = response.json()["choices"][0]["message"]["content"]
-
+        # Si l'utilisateur demande une action sur un jour précis
+        if jour_cible and any(m in message_lower for m in ["régénère", "recrée", "modifie", "change"]):
             with open("backend/data/planning.json", "r", encoding="utf-8") as f:
                 data_json = json.load(f)
-            data_json["plannings"][jour_cible] = contenu
-
+            data_json["plannings"][jour_cible] = contenu_ia
             with open("backend/data/planning.json", "w", encoding="utf-8") as f:
                 json.dump(data_json, f, ensure_ascii=False, indent=2)
 
             await generer_liste_courses(data_json["plannings"])
-            reponse = f"✅ Le planning du {jour_cible} a été mis à jour avec succès."
-        except Exception as e:
-            reponse = f"❌ Erreur lors de la régénération IA : {str(e)}"
-    else:
-        reponse = (
-            "Je suis ton coach IA 💬\n\n"
-            "Tu peux me dire par exemple :\n"
-            "- 'régénère le jeudi'\n"
-            "- 'modifie le mardi'\n"
-            "Et je mettrai à jour ton planning automatiquement ✅"
-        )
+            reponse = f"✅ Planning du {jour_cible} mis à jour.\n\n{contenu_ia}"
+        else:
+            reponse = f"🤖 Réponse du coach IA :\n\n{contenu_ia}"
+
+    except Exception as e:
+        reponse = f"❌ Erreur : {str(e)}"
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
