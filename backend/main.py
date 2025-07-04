@@ -119,15 +119,27 @@ async def coach_page(request: Request):
 
 @app.post("/coach", response_class=HTMLResponse)
 async def coach_action(request: Request, message: str = Form(...)):
-    jour_cible = next((j for j in JOURS if j.lower() in message.lower()), None)
+    jour_cible = None
+    for jour in JOURS:
+        if jour.lower() in message.lower():
+            jour_cible = jour
+            break
+
     message_lower = message.lower()
 
     if jour_cible and any(mot in message_lower for mot in ["régénère", "recrée", "modifie", "change"]):
-        prompt = f"Génère un planning nutritionnel complet pour {jour_cible} : 3 repas équilibrés avec grammages précis, adaptés à un profil actif."
-        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+        prompt = (
+            f"Génère un planning nutritionnel complet et clair pour {jour_cible} : "
+            f"3 repas équilibrés (matin, midi, soir) avec grammages précis, adaptés à un profil actif."
+        )
+        data = {
+            "model": "anthropic/claude-3-haiku",
+            "messages": [{"role": "user", "content": prompt}]
+        }
 
         try:
             response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+            response.raise_for_status()
             contenu = response.json()["choices"][0]["message"]["content"]
 
             with open("backend/data/planning.json", "r", encoding="utf-8") as f:
@@ -138,16 +150,16 @@ async def coach_action(request: Request, message: str = Form(...)):
                 json.dump(data_json, f, ensure_ascii=False, indent=2)
 
             await generer_liste_courses(data_json["plannings"])
-            reponse = f"✅ Le planning de {jour_cible} a été mis à jour avec succès !"
+            reponse = f"✅ Le planning du {jour_cible} a été mis à jour avec succès."
         except Exception as e:
-            reponse = f"❌ Erreur lors de la régénération : {str(e)}"
+            reponse = f"❌ Erreur lors de la régénération IA : {str(e)}"
     else:
         reponse = (
-            "Je suis ton coach IA ! ✨\n\n"
-            "Essaye par exemple :\n"
+            "Je suis ton coach IA 💬\n\n"
+            "Tu peux me dire par exemple :\n"
             "- 'régénère le jeudi'\n"
-            "- 'modifie le lundi'\n"
-            "Et je mettrai à jour ton planning automatiquement 💡"
+            "- 'modifie le mardi'\n"
+            "Et je mettrai à jour ton planning automatiquement ✅"
         )
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
