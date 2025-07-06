@@ -205,44 +205,42 @@ async def coach_action(request: Request, message: str = Form(...)):
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
 
-# NOUVELLE FONCTIONNALITÉ : REMARQUE POUR NOUVELLE SEMAINE
 @app.get("/remarque", response_class=HTMLResponse)
-async def remarque_form(request: Request):
+async def remarque_page(request: Request):
     return templates.TemplateResponse("remarque.html", {"request": request, "reponse": ""})
 
 @app.post("/remarque", response_class=HTMLResponse)
-async def remarque_submit(request: Request, feedback: str = Form(...)):
+async def traiter_remarque(request: Request, feedback: str = Form(...)):
     try:
         with open("backend/data/formulaire.json", "r", encoding="utf-8") as f:
-            formulaire_data = json.load(f)
+            infos = json.load(f)
 
-        age = formulaire_data["age"]
-        poids = formulaire_data["poids"]
-        taille = formulaire_data["taille"]
-        sexe = formulaire_data["sexe"]
-        objectif = formulaire_data["objectif"]
-        activite = formulaire_data["activite"]
+        prompt = (
+            "Tu es un expert en nutrition. Voici le profil de l'utilisateur :\n"
+            f"{infos}\n\n"
+            f"Et voici sa remarque : {feedback}\n\n"
+            "Génère un nouveau planning nutritionnel complet sur 7 jours, un jour par bloc avec 3 repas (matin, midi, soir) avec aliments + grammages, sans intro ni explication."
+        )
+        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        contenu = response.json()["choices"][0]["message"]["content"]
 
-        plannings = {}
+        data_json = {}
         for jour in JOURS:
-            prompt = (
-                f"Tu es un expert en nutrition. Génére un planning pour le {jour} : "
-                f"3 repas équilibrés (matin, midi, soir) avec les grammages, adaptés à un profil de "
-                f"{age} ans, {poids} kg, {taille} cm, sexe {sexe}, objectif {objectif}, activité {activite}. "
-                f"Tiens aussi compte de cette remarque utilisateur : {feedback}"
-            )
-            data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
-            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-            contenu = response.json()["choices"][0]["message"]["content"]
-            plannings[jour] = contenu
+            index = contenu.lower().find(jour.lower())
+            if index != -1:
+                bloc = contenu[index:].split("\n\n")[0].strip()
+                data_json[jour] = bloc
+            else:
+                data_json[jour] = "Jour manquant ou mal structuré."
 
         with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-            json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
+            json.dump({"plannings": data_json}, f, ensure_ascii=False, indent=2)
 
-        await generer_liste_courses(plannings)
-        await generer_training(objectif, activite)
-
-        return templates.TemplateResponse("remarque.html", {"request": request, "reponse": "✅ Nouvelle semaine générée avec ta remarque !"})
+        await generer_liste_courses(data_json)
+        reponse = "✅ Nouvelle semaine régénérée avec succès."
 
     except Exception as e:
-        return templates.TemplateResponse("remarque.html", {"request": request, "reponse": f"❌ Erreur : {str(e)}"})
+        reponse = f"❌ Erreur IA : {str(e)}"
+
+    return templates.TemplateResponse("remarque.html", {"request": request, "reponse": reponse})
