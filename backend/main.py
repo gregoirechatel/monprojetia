@@ -29,6 +29,33 @@ async def home(request: Request):
 async def formulaire(request: Request):
     return templates.TemplateResponse("formulaire.html", {"request": request})
 
+@app.get("/planning", response_class=HTMLResponse)
+async def afficher_planning(request: Request):
+    try:
+        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+            plannings = json.load(f)["plannings"]
+    except:
+        plannings = {}
+    return templates.TemplateResponse("planning.html", {"request": request, "plannings": plannings})
+
+@app.get("/liste", response_class=HTMLResponse)
+async def afficher_liste(request: Request):
+    try:
+        with open("backend/data/liste.json", "r", encoding="utf-8") as f:
+            liste = json.load(f)["liste"]
+    except:
+        liste = "Aucune liste trouvée."
+    return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
+
+@app.get("/training", response_class=HTMLResponse)
+async def afficher_training(request: Request):
+    try:
+        with open("backend/data/training.json", "r", encoding="utf-8") as f:
+            training = json.load(f)["training"]
+    except:
+        training = "Aucun planning trouvé."
+    return templates.TemplateResponse("training.html", {"request": request, "training": training})
+
 @app.post("/generer", response_class=HTMLResponse)
 async def generer(request: Request, objectif: str = Form(...), age: int = Form(...),
     poids: float = Form(...), taille: int = Form(...), sexe: str = Form(...),
@@ -53,6 +80,8 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
     await generer_liste_courses(plannings)
+    await generer_training(objectif, activite)
+
     return RedirectResponse(url="/planning", status_code=303)
 
 async def generer_liste_courses(plannings: dict):
@@ -70,23 +99,20 @@ async def generer_liste_courses(plannings: dict):
     with open("backend/data/liste.json", "w", encoding="utf-8") as f:
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
-@app.get("/planning", response_class=HTMLResponse)
-async def afficher_planning(request: Request):
+async def generer_training(objectif: str, activite: str):
+    prompt = (
+        f"Tu es un coach sportif. Génère un planning d'entraînement complet sur 7 jours adapté à une personne ayant comme objectif '{objectif}' "
+        f"et un niveau d’activité '{activite}'. Utilise un format clair avec un jour par ligne. Inclue un jour de repos."
+    )
+    data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
     try:
-        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-            plannings = json.load(f)["plannings"]
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        contenu = response.json()["choices"][0]["message"]["content"]
     except:
-        plannings = {}
-    return templates.TemplateResponse("planning.html", {"request": request, "plannings": plannings})
+        contenu = "Erreur génération entraînement."
 
-@app.get("/liste", response_class=HTMLResponse)
-async def afficher_liste(request: Request):
-    try:
-        with open("backend/data/liste.json", "r", encoding="utf-8") as f:
-            liste = json.load(f)["liste"]
-    except:
-        liste = "Aucune liste trouvée."
-    return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
+    with open("backend/data/training.json", "w", encoding="utf-8") as f:
+        json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
 
 @app.get("/regenerer/{jour}", response_class=HTMLResponse)
 async def regenerer_jour(request: Request, jour: str):
@@ -124,47 +150,57 @@ async def coach_action(request: Request, message: str = Form(...)):
     reponse = ""
 
     try:
-        # Prompt global interprétable par Claude
-        prompt = (
-            "Tu es un expert en nutrition. Voici une demande utilisateur :\n"
-            f"{message}\n\n"
-            "Interprète cette demande et génère les plannings modifiés en conséquence. "
-            "Pour chaque jour concerné, donne uniquement un planning structuré en 3 repas (matin, midi, soir) avec des aliments et grammages. "
-            "Ne fais pas d’introduction, pas de blabla, pas de conseil. Donne uniquement le texte brut des repas pour chaque jour."
-        )
+        # nutrition ou entraînement ?
+        if "entraînement" in message_lower or "training" in message_lower or "sport" in message_lower:
+            prompt = (
+                "Tu es un coach sportif. Voici une demande utilisateur :\n"
+                f"{message}\n\n"
+                "Génère un planning d'entraînement hebdomadaire adapté à sa requête. Donne un jour par ligne, clair, structuré, pas de blabla."
+            )
 
-        data = {
-            "model": "anthropic/claude-3-haiku",
-            "messages": [{"role": "user", "content": prompt}]
-        }
+            data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+            contenu = response.json()["choices"][0]["message"]["content"]
 
-        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-        contenu = response.json()["choices"][0]["message"]["content"]
+            with open("backend/data/training.json", "w", encoding="utf-8") as f:
+                json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
 
-        # Si jour identifié → maj ciblée ; sinon maj tous jours
-        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-            data_json = json.load(f)
+            reponse = f"✅ Nouveau programme d'entraînement généré :\n\n{contenu}"
 
-        if jour_cible:
-            data_json["plannings"][jour_cible] = contenu
         else:
-            # tentative : chercher un bloc par jour dans la réponse et l’appliquer
-            for jour in JOURS:
-                if jour.lower() in contenu.lower():
-                    index = contenu.lower().index(jour.lower())
-                    bloc = contenu[index:].split("\n\n")[0].strip()
-                    data_json["plannings"][jour] = bloc
-                else:
-                    # fallback : appliquer à tous si aucun découpage détecté
-                    for jour in JOURS:
-                        data_json["plannings"][jour] = contenu
-                    break
+            prompt = (
+                "Tu es un expert en nutrition. Voici une demande utilisateur :\n"
+                f"{message}\n\n"
+                "Interprète cette demande et génère les plannings modifiés en conséquence. "
+                "Pour chaque jour concerné, donne uniquement un planning structuré en 3 repas (matin, midi, soir) avec des aliments et grammages. "
+                "Ne fais pas d’introduction, pas de blabla, pas de conseil. Donne uniquement le texte brut des repas pour chaque jour."
+            )
 
-        with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-            json.dump(data_json, f, ensure_ascii=False, indent=2)
+            data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+            contenu = response.json()["choices"][0]["message"]["content"]
 
-        await generer_liste_courses(data_json["plannings"])
-        reponse = f"✅ Planning mis à jour.\n\n{contenu}"
+            with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+                data_json = json.load(f)
+
+            if jour_cible:
+                data_json["plannings"][jour_cible] = contenu
+            else:
+                for jour in JOURS:
+                    if jour.lower() in contenu.lower():
+                        index = contenu.lower().index(jour.lower())
+                        bloc = contenu[index:].split("\n\n")[0].strip()
+                        data_json["plannings"][jour] = bloc
+                    else:
+                        for jour in JOURS:
+                            data_json["plannings"][jour] = contenu
+                        break
+
+            with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+                json.dump(data_json, f, ensure_ascii=False, indent=2)
+
+            await generer_liste_courses(data_json["plannings"])
+            reponse = f"✅ Planning nutrition mis à jour.\n\n{contenu}"
 
     except Exception as e:
         reponse = f"❌ Erreur IA : {str(e)}"
