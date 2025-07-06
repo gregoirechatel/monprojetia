@@ -2,24 +2,52 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Nouvelle semaine</title>
+    <title>Remarque pour la semaine</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .container {
+            max-width: 700px;
+            margin: auto;
+            padding: 30px;
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #ffc107;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧠 Génération d'une nouvelle semaine</h1>
-        <p>L’IA te pose une question :</p>
-        <p><strong>👉 Une amélioration ? Un ressenti ? Une remarque ?</strong><br>
-        Dis-le, j’en prendrai compte pour la semaine prochaine.</p>
+        <h1>🧠 Nouvelle semaine, nouvelle chance !</h1>
+        <p>Avant de régénérer ton planning, dis-moi : <strong>une amélioration ? un ressenti ? une remarque ?</strong><br>
+        J'en tiendrai compte pour la semaine prochaine !</p>
 
-        <form action="/remarque" method="post">
-            <textarea name="remarque" rows="5" style="width: 100%;" placeholder="Exemples : j’ai eu faim, trop strict, manque de variété…" required></textarea>
-            <br><br>
+        <form method="post">
+            <label for="feedback">Ta remarque :</label><br>
+            <textarea name="feedback" id="feedback" required></textarea><br>
             <button type="submit">🚀 Go régénérer la semaine</button>
         </form>
 
-        <br>
-        <a href="/planning" class="button">⬅️ Retour au planning</a>
+        <div style="margin-top:20px;">
+            <a href="/planning">⬅️ Retour au planning</a>
+        </div>
     </div>
 </body>
 </html>

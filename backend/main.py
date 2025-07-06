@@ -156,7 +156,6 @@ async def coach_action(request: Request, message: str = Form(...)):
                 f"{message}\n\n"
                 "Génère un planning d'entraînement hebdomadaire adapté à sa requête. Donne un jour par ligne, clair, structuré, sans blabla."
             )
-
             data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
             response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
             contenu = response.json()["choices"][0]["message"]["content"]
@@ -173,7 +172,6 @@ async def coach_action(request: Request, message: str = Form(...)):
                 "Interprète cette demande et génère les plannings nutritionnels modifiés. Pour chaque jour concerné, donne uniquement 3 repas (matin, midi, soir) avec aliments + grammages. "
                 "Pas d’introduction, pas de blabla. Format brut uniquement."
             )
-
             data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
             response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
             contenu = response.json()["choices"][0]["message"]["content"]
@@ -206,41 +204,37 @@ async def coach_action(request: Request, message: str = Form(...)):
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
 
 @app.get("/remarque", response_class=HTMLResponse)
-async def remarque_page(request: Request):
-    return templates.TemplateResponse("remarque.html", {"request": request, "reponse": ""})
+async def get_remarque(request: Request):
+    return templates.TemplateResponse("remarque.html", {"request": request})
 
 @app.post("/remarque", response_class=HTMLResponse)
-async def traiter_remarque(request: Request, feedback: str = Form(...)):
+async def post_remarque(request: Request, feedback: str = Form(...)):
     try:
         with open("backend/data/formulaire.json", "r", encoding="utf-8") as f:
-            infos = json.load(f)
+            formulaire = json.load(f)
+    except:
+        return templates.TemplateResponse("remarque.html", {"request": request, "erreur": "❌ Formulaire manquant"})
 
+    plannings = {}
+    for jour in JOURS:
         prompt = (
-            "Tu es un expert en nutrition. Voici le profil de l'utilisateur :\n"
-            f"{infos}\n\n"
-            f"Et voici sa remarque : {feedback}\n\n"
-            "Génère un nouveau planning nutritionnel complet sur 7 jours, un jour par bloc avec 3 repas (matin, midi, soir) avec aliments + grammages, sans intro ni explication."
+            f"Tu es un expert en nutrition. Génére un planning pour le {jour} en tenant compte de cette remarque : {feedback}. "
+            f"3 repas équilibrés (matin, midi, soir) avec les grammages, adaptés à un profil de "
+            f"{formulaire['age']} ans, {formulaire['poids']} kg, {formulaire['taille']} cm, sexe {formulaire['sexe']}, "
+            f"objectif {formulaire['objectif']}, activité {formulaire['activite']}."
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
-        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-        contenu = response.json()["choices"][0]["message"]["content"]
+        try:
+            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+            contenu = response.json()["choices"][0]["message"]["content"]
+            plannings[jour] = contenu
+        except:
+            plannings[jour] = f"Erreur IA pour {jour}"
 
-        data_json = {}
-        for jour in JOURS:
-            index = contenu.lower().find(jour.lower())
-            if index != -1:
-                bloc = contenu[index:].split("\n\n")[0].strip()
-                data_json[jour] = bloc
-            else:
-                data_json[jour] = "Jour manquant ou mal structuré."
+    with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+        json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
-        with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-            json.dump({"plannings": data_json}, f, ensure_ascii=False, indent=2)
+    await generer_liste_courses(plannings)
+    await generer_training(formulaire["objectif"], formulaire["activite"])
 
-        await generer_liste_courses(data_json)
-        reponse = "✅ Nouvelle semaine régénérée avec succès."
-
-    except Exception as e:
-        reponse = f"❌ Erreur IA : {str(e)}"
-
-    return templates.TemplateResponse("remarque.html", {"request": request, "reponse": reponse})
+    return RedirectResponse(url="/planning", status_code=303)
