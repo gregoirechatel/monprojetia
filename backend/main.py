@@ -124,13 +124,13 @@ async def coach_action(request: Request, message: str = Form(...)):
     reponse = ""
 
     try:
-        # Prompt intelligent unique
+        # Prompt global interprétable par Claude
         prompt = (
             "Tu es un expert en nutrition. Voici une demande utilisateur :\n"
             f"{message}\n\n"
-            "Interprète-la et génère un nouveau planning alimentaire uniquement pour le jour concerné. "
-            "Ce planning doit être structuré en 3 repas (matin, midi, soir) avec des aliments concrets et grammages. "
-            "Ne parle pas de motivation ni d'organisation de vie. Fournis juste un texte brut du planning."
+            "Interprète cette demande et génère les plannings modifiés en conséquence. "
+            "Pour chaque jour concerné, donne uniquement un planning structuré en 3 repas (matin, midi, soir) avec des aliments et grammages. "
+            "Ne fais pas d’introduction, pas de blabla, pas de conseil. Donne uniquement le texte brut des repas pour chaque jour."
         )
 
         data = {
@@ -141,19 +141,30 @@ async def coach_action(request: Request, message: str = Form(...)):
         response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
         contenu = response.json()["choices"][0]["message"]["content"]
 
+        # Si jour identifié → maj ciblée ; sinon maj tous jours
+        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+            data_json = json.load(f)
+
         if jour_cible:
-            with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-                data_json = json.load(f)
-
             data_json["plannings"][jour_cible] = contenu
-
-            with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-                json.dump(data_json, f, ensure_ascii=False, indent=2)
-
-            await generer_liste_courses(data_json["plannings"])
-            reponse = f"✅ Le planning du {jour_cible} a été mis à jour.\n\n{contenu}"
         else:
-            reponse = f"🤖 Réponse IA :\n\n{contenu}"
+            # tentative : chercher un bloc par jour dans la réponse et l’appliquer
+            for jour in JOURS:
+                if jour.lower() in contenu.lower():
+                    index = contenu.lower().index(jour.lower())
+                    bloc = contenu[index:].split("\n\n")[0].strip()
+                    data_json["plannings"][jour] = bloc
+                else:
+                    # fallback : appliquer à tous si aucun découpage détecté
+                    for jour in JOURS:
+                        data_json["plannings"][jour] = contenu
+                    break
+
+        with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+            json.dump(data_json, f, ensure_ascii=False, indent=2)
+
+        await generer_liste_courses(data_json["plannings"])
+        reponse = f"✅ Planning mis à jour.\n\n{contenu}"
 
     except Exception as e:
         reponse = f"❌ Erreur IA : {str(e)}"
