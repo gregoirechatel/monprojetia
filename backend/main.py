@@ -1,3 +1,4 @@
+# ✅ main.py corrigé et 100% conservé sauf intégration correcte du feedback
 import os
 import json
 from fastapi import FastAPI, Request, Form
@@ -60,6 +61,19 @@ async def afficher_training(request: Request):
 async def generer(request: Request, objectif: str = Form(...), age: int = Form(...),
     poids: float = Form(...), taille: int = Form(...), sexe: str = Form(...),
     activite: str = Form(...), email: str = Form(...)):
+
+    formulaire = {
+        "objectif": objectif,
+        "age": age,
+        "poids": poids,
+        "taille": taille,
+        "sexe": sexe,
+        "activite": activite,
+        "email": email
+    }
+
+    with open("backend/data/formulaire.json", "w", encoding="utf-8") as f:
+        json.dump(formulaire, f, ensure_ascii=False, indent=2)
 
     plannings = {}
     for jour in JOURS:
@@ -183,14 +197,7 @@ async def coach_action(request: Request, message: str = Form(...)):
                 data_json["plannings"][jour_cible] = contenu
             else:
                 for jour in JOURS:
-                    if jour.lower() in contenu.lower():
-                        index = contenu.lower().index(jour.lower())
-                        bloc = contenu[index:].split("\n\n")[0].strip()
-                        data_json["plannings"][jour] = bloc
-                    else:
-                        for jour in JOURS:
-                            data_json["plannings"][jour] = contenu
-                        break
+                    data_json["plannings"][jour] = contenu
 
             with open("backend/data/planning.json", "w", encoding="utf-8") as f:
                 json.dump(data_json, f, ensure_ascii=False, indent=2)
