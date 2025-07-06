@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Nouvelle semaine</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Génération d'une nouvelle semaine</h1>
+        <p>L’IA te pose une question :</p>
+        <p><strong>👉 Une amélioration ? Un ressenti ? Une remarque ?</strong><br>
+        Dis-le, j’en prendrai compte pour la semaine prochaine.</p>
+
+        <form action="/remarque" method="post">
+            <textarea name="remarque" rows="5" style="width: 100%;" placeholder="Exemples : j’ai eu faim, trop strict, manque de variété…" required></textarea>
+            <br><br>
+            <button type="submit">🚀 Go régénérer la semaine</button>
+        </form>
+
+        <br>
+        <a href="/planning" class="button">⬅️ Retour au planning</a>
+    </div>
+</body>
+</html>
