@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon profil</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>👤 Mon espace personnel</h1>
+        <p><strong>Email :</strong> {{ email }}</p>
+
+        <div class="button-group" style="margin-top: 20px;">
+            <a href="/planning" class="button">🍽️ Voir mon planning nutrition</a>
+            <a href="/training" class="button">🏋️ Voir mon planning sport</a>
+            <a href="/liste" class="button">🛒 Liste de courses</a>
+        </div>
+
+        <form action="/logout" method="post" style="margin-top: 30px;">
+            <button type="submit" class="button secondary">🚪 Déconnexion</button>
+        </form>
+
+        <a href="/" class="button" style="margin-top: 20px;">🏠 Accueil</a>
+    </div>
+</body>
+</html>
