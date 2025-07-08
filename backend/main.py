@@ -1,4 +1,3 @@
-
 import os
 import json
 from fastapi import FastAPI, Request, Form
@@ -7,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import requests
+from backend.utils import user_file_path  # 👈 ajout unique
 
 load_dotenv()
 
@@ -33,7 +33,7 @@ async def formulaire(request: Request):
 @app.get("/planning", response_class=HTMLResponse)
 async def afficher_planning(request: Request):
     try:
-        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+        with open(user_file_path("planning.json"), "r", encoding="utf-8") as f:
             plannings = json.load(f)["plannings"]
     except:
         plannings = {}
@@ -42,7 +42,7 @@ async def afficher_planning(request: Request):
 @app.get("/liste", response_class=HTMLResponse)
 async def afficher_liste(request: Request):
     try:
-        with open("backend/data/liste.json", "r", encoding="utf-8") as f:
+        with open(user_file_path("liste.json"), "r", encoding="utf-8") as f:
             liste = json.load(f)["liste"]
     except:
         liste = "Aucune liste trouvée."
@@ -51,7 +51,7 @@ async def afficher_liste(request: Request):
 @app.get("/training", response_class=HTMLResponse)
 async def afficher_training(request: Request):
     try:
-        with open("backend/data/training.json", "r", encoding="utf-8") as f:
+        with open(user_file_path("training.json"), "r", encoding="utf-8") as f:
             training = json.load(f)["training"]
     except:
         training = "Aucun planning trouvé."
@@ -90,7 +90,7 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
         except:
             plannings[jour] = f"Erreur IA pour {jour}"
 
-    with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+    with open(user_file_path("planning.json"), "w", encoding="utf-8") as f:
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
     await generer_liste_courses(plannings)
@@ -110,7 +110,7 @@ async def generer_liste_courses(plannings: dict):
     except:
         liste = "Erreur lors de la génération de la liste."
 
-    with open("backend/data/liste.json", "w", encoding="utf-8") as f:
+    with open(user_file_path("liste.json"), "w", encoding="utf-8") as f:
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
 async def generer_training(objectif: str, activite: str):
@@ -125,7 +125,7 @@ async def generer_training(objectif: str, activite: str):
     except:
         contenu = "Erreur génération entraînement."
 
-    with open("backend/data/training.json", "w", encoding="utf-8") as f:
+    with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
         json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
 
 @app.get("/regenerer/{jour}", response_class=HTMLResponse)
@@ -140,11 +140,11 @@ async def regenerer_jour(request: Request, jour: str):
         response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
         contenu = response.json()["choices"][0]["message"]["content"]
 
-        with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+        with open(user_file_path("planning.json"), "r", encoding="utf-8") as f:
             data_json = json.load(f)
         data_json["plannings"][jour] = contenu
 
-        with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+        with open(user_file_path("planning.json"), "w", encoding="utf-8") as f:
             json.dump(data_json, f, ensure_ascii=False, indent=2)
 
         await generer_liste_courses(data_json["plannings"])
@@ -174,7 +174,7 @@ async def coach_action(request: Request, message: str = Form(...)):
             response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
             contenu = response.json()["choices"][0]["message"]["content"]
 
-            with open("backend/data/training.json", "w", encoding="utf-8") as f:
+            with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
                 json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
 
             reponse = f"✅ Nouveau programme d'entraînement généré :\n\n{contenu}"
@@ -190,7 +190,7 @@ async def coach_action(request: Request, message: str = Form(...)):
             response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
             contenu = response.json()["choices"][0]["message"]["content"]
 
-            with open("backend/data/planning.json", "r", encoding="utf-8") as f:
+            with open(user_file_path("planning.json"), "r", encoding="utf-8") as f:
                 data_json = json.load(f)
 
             if jour_cible:
@@ -199,7 +199,7 @@ async def coach_action(request: Request, message: str = Form(...)):
                 for jour in JOURS:
                     data_json["plannings"][jour] = contenu
 
-            with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+            with open(user_file_path("planning.json"), "w", encoding="utf-8") as f:
                 json.dump(data_json, f, ensure_ascii=False, indent=2)
 
             await generer_liste_courses(data_json["plannings"])
@@ -238,7 +238,7 @@ async def post_remarque(request: Request, feedback: str = Form(...)):
         except:
             plannings[jour] = f"Erreur IA pour {jour}"
 
-    with open("backend/data/planning.json", "w", encoding="utf-8") as f:
+    with open(user_file_path("planning.json"), "w", encoding="utf-8") as f:
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
     await generer_liste_courses(plannings)
