@@ -22,8 +22,8 @@ HEADERS = {
 CLAUDE_URL = "https://openrouter.ai/api/v1/chat/completions"
 JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+@app.get("/accueil", response_class=HTMLResponse)
+async def dashboard(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/formulaire", response_class=HTMLResponse)
@@ -70,7 +70,8 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
         "sexe": sexe,
         "activite": activite,
         "email": email
-    }
+    } 
+    os.makedirs("backend/data", exist_ok=True)  # 👈 à ajouter ici
 
     with open("backend/data/formulaire.json", "w", encoding="utf-8") as f:
         json.dump(formulaire, f, ensure_ascii=False, indent=2)

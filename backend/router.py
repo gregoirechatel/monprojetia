@@ -58,4 +58,4 @@ async def login_post(request: Request, email: str = Form(...), password: str = F
         return templates.TemplateResponse("login.html", {"request": request, "error": "Identifiants invalides."})
 
     # Utilisateur connecté → redirection vers vraie page d'accueil
-    return RedirectResponse(url="/formulaire", status_code=303)
+    return RedirectResponse(url="/accueil", status_code=303)
