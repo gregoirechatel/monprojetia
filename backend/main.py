@@ -153,63 +153,6 @@ async def regenerer_jour(request: Request, jour: str):
 
     return RedirectResponse(url="/planning", status_code=303)
 
-@app.get("/coach", response_class=HTMLResponse)
-async def coach_page(request: Request):
-    return templates.TemplateResponse("coach.html", {"request": request, "reponse": ""})
-
-@app.post("/coach", response_class=HTMLResponse)
-async def coach_action(request: Request, message: str = Form(...)):
-    message_lower = message.lower()
-    jour_cible = next((j for j in JOURS if j.lower() in message_lower), None)
-    reponse = ""
-
-    try:
-        if any(mot in message_lower for mot in ["entraînement", "entrainement", "training", "sport", "pompes", "abdos", "squat", "cardio", "repos"]):
-            prompt = (
-                "Tu es un coach sportif. Voici une demande utilisateur :\n"
-                f"{message}\n\n"
-                "Génère un planning d'entraînement hebdomadaire adapté à sa requête. Donne un jour par ligne, clair, structuré, sans blabla."
-            )
-            data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
-            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-            contenu = response.json()["choices"][0]["message"]["content"]
-
-            with open("backend/data/training.json", "w", encoding="utf-8") as f:
-                json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
-
-            reponse = f"✅ Nouveau programme d'entraînement généré :\n\n{contenu}"
-
-        else:
-            prompt = (
-                "Tu es un expert en nutrition. Voici une demande utilisateur :\n"
-                f"{message}\n\n"
-                "Interprète cette demande et génère les plannings nutritionnels modifiés. Pour chaque jour concerné, donne uniquement 3 repas (matin, midi, soir) avec aliments + grammages. "
-                "Pas d’introduction, pas de blabla. Format brut uniquement."
-            )
-            data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
-            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-            contenu = response.json()["choices"][0]["message"]["content"]
-
-            with open("backend/data/planning.json", "r", encoding="utf-8") as f:
-                data_json = json.load(f)
-
-            if jour_cible:
-                data_json["plannings"][jour_cible] = contenu
-            else:
-                for jour in JOURS:
-                    data_json["plannings"][jour] = contenu
-
-            with open("backend/data/planning.json", "w", encoding="utf-8") as f:
-                json.dump(data_json, f, ensure_ascii=False, indent=2)
-
-            await generer_liste_courses(data_json["plannings"])
-            reponse = f"✅ Planning nutrition mis à jour.\n\n{contenu}"
-
-    except Exception as e:
-        reponse = f"❌ Erreur IA : {str(e)}"
-
-    return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
-
 @app.get("/remarque", response_class=HTMLResponse)
 async def get_remarque(request: Request):
     return templates.TemplateResponse("remarque.html", {"request": request})
