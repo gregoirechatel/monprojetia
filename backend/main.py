@@ -245,3 +245,5 @@ async def post_remarque(request: Request, feedback: str = Form(...)):
     await generer_training(formulaire["objectif"], formulaire["activite"])
 
     return RedirectResponse(url="/planning", status_code=303)
+from backend import router
+app.include_router(router.router)
