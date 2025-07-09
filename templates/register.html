@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un compte</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🆕 Créer un compte</h1>
+        <form action="/register" method="post">
+            <label for="email">Email :</label>
+            <input type="email" name="email" required>
+
+            <label for="password">Mot de passe :</label>
+            <input type="password" name="password" required>
+
+            <button type="submit">Créer mon compte</button>
+        </form>
+        <a href="/" class="button">⬅️ Retour</a>
+    </div>
+</body>
+</html>
