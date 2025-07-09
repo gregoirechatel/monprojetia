@@ -73,7 +73,7 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
     } 
     os.makedirs("backend/data", exist_ok=True)  # 👈 à ajouter ici
 
-    with open("backend/data/formulaire.json", "w", encoding="utf-8") as f:
+    with open(user_file_path("formulaire.json"), "w", encoding="utf-8") as f:
         json.dump(formulaire, f, ensure_ascii=False, indent=2)
 
     plannings = {}
@@ -218,7 +218,7 @@ async def get_remarque(request: Request):
 @app.post("/remarque", response_class=HTMLResponse)
 async def post_remarque(request: Request, feedback: str = Form(...)):
     try:
-        with open("backend/data/formulaire.json", "r", encoding="utf-8") as f:
+        with open(user_file_path("formulaire.json"), "r", encoding="utf-8") as f:
             formulaire = json.load(f)
     except:
         return templates.TemplateResponse("remarque.html", {"request": request, "erreur": "❌ Formulaire manquant"})
@@ -246,5 +246,6 @@ async def post_remarque(request: Request, feedback: str = Form(...)):
     await generer_training(formulaire["objectif"], formulaire["activite"])
 
     return RedirectResponse(url="/planning", status_code=303)
+
 from backend import router
 app.include_router(router.router)
