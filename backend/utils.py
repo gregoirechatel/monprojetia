@@ -5,11 +5,12 @@ DATA_ROOT = "backend/data/utilisateurs"
 
 def get_user_email():
     try:
-        with open("backend/data/formulaire.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data.get("email", None)
+        with open("backend/data/session.json", "r", encoding="utf-8") as f:
+            session = json.load(f)
+            return session.get("email", None)
     except:
         return None
+
 
 def user_file_path(filename: str):
     email = get_user_email()

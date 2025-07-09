@@ -57,5 +57,9 @@ async def login_post(request: Request, email: str = Form(...), password: str = F
     if email not in users or users[email] != password:
         return templates.TemplateResponse("login.html", {"request": request, "error": "Identifiants invalides."})
 
+    # ✅ On mémorise l'utilisateur connecté
+    with open(os.path.join(DATA_DIR, "session.json"), "w", encoding="utf-8") as f:
+        json.dump({"email": email}, f)
+
     # Utilisateur connecté → redirection vers vraie page d'accueil
     return RedirectResponse(url="/accueil", status_code=303)
