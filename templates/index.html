@@ -5,36 +5,49 @@
     <title>Accueil - Coaching IA</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("/static/salle.png");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
         header {
-            background-color: #2a2a2a;
+            background-color: rgba(30, 30, 30, 0.9);
             color: #fdd835;
             padding: 20px;
             text-align: center;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            font-size: 1.4em;
         }
 
-        .container-accueil {
+        .container {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 30px;
+            padding: 40px;
+            background-color: rgba(0, 0, 0, 0.7);
+            margin: 30px auto;
+            border-radius: 20px;
+            max-width: 1000px;
         }
 
         .card {
             background-color: #1e1e1e;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             padding: 30px;
             width: 260px;
             text-align: center;
             transition: transform 0.3s;
-            border: 1px solid #444;
         }
 
         .card:hover {
-            transform: scale(1.03);
+            transform: translateY(-5px);
         }
 
         .card h2 {
@@ -44,16 +57,27 @@
 
         .card a {
             text-decoration: none;
+            background-color: #fdd835;
+            color: #1e1e1e;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .card a:hover {
+            background-color: #ffee58;
         }
 
         footer {
-            background-color: #2a2a2a;
-            color: #ccc;
+            background-color: rgba(30, 30, 30, 0.8);
             text-align: center;
-            padding: 15px;
+            padding: 20px;
+            font-size: 14px;
+            color: #ccc;
             margin-top: 40px;
-            border-radius: 12px;
-            font-size: 0.9em;
         }
     </style>
 </head>
@@ -62,30 +86,30 @@
         <h1>Bienvenue sur ton assistant nutrition et sport IA 🧠💪</h1>
     </header>
 
-    <div class="container container-accueil">
+    <div class="container">
         <div class="card">
             <h2>Remplir le formulaire</h2>
-            <a href="/formulaire" class="button">Accéder</a>
+            <a href="/formulaire">Accéder</a>
         </div>
 
         <div class="card">
             <h2>Voir mon planning nutrition</h2>
-            <a href="/planning" class="button">Consulter</a>
+            <a href="/planning">Consulter</a>
         </div>
 
         <div class="card">
             <h2>Voir ma liste de courses</h2>
-            <a href="/liste" class="button">Consulter</a>
+            <a href="/liste">Consulter</a>
         </div>
 
         <div class="card">
             <h2>Voir mon entraînement</h2>
-            <a href="/training" class="button">Consulter</a>
+            <a href="/training">Consulter</a>
         </div>
 
         <div class="card">
             <h2>💬 Parler à mon coach</h2>
-            <a href="/coach" class="button">Ouvrir</a>
+            <a href="/coach">Ouvrir</a>
         </div>
     </div>
 
