@@ -5,73 +5,55 @@
     <title>Accueil - Coaching IA</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #f9f9f9, #dbeeff);
-            margin: 0;
-            padding: 0;
-        }
-
         header {
-            background-color: #004080;
-            color: white;
+            background-color: #2a2a2a;
+            color: #fdd835;
             padding: 20px;
             text-align: center;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
         }
 
-        h1 {
-            margin: 0;
-        }
-
-        .container {
+        .container-accueil {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 30px;
-            padding: 40px;
         }
 
         .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             padding: 30px;
             width: 260px;
             text-align: center;
             transition: transform 0.3s;
+            border: 1px solid #444;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: scale(1.03);
         }
 
         .card h2 {
-            color: #004080;
+            color: #fdd835;
             margin-bottom: 20px;
         }
 
         .card a {
             text-decoration: none;
-            background-color: #004080;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            display: inline-block;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-
-        .card a:hover {
-            background-color: #0066cc;
         }
 
         footer {
-            background-color: #e0e0e0;
+            background-color: #2a2a2a;
+            color: #ccc;
             text-align: center;
-            padding: 20px;
-            font-size: 14px;
-            color: #555;
+            padding: 15px;
             margin-top: 40px;
+            border-radius: 12px;
+            font-size: 0.9em;
         }
     </style>
 </head>
@@ -80,30 +62,30 @@
         <h1>Bienvenue sur ton assistant nutrition et sport IA 🧠💪</h1>
     </header>
 
-    <div class="container">
+    <div class="container container-accueil">
         <div class="card">
             <h2>Remplir le formulaire</h2>
-            <a href="/formulaire">Accéder</a>
+            <a href="/formulaire" class="button">Accéder</a>
         </div>
 
         <div class="card">
             <h2>Voir mon planning nutrition</h2>
-            <a href="/planning">Consulter</a>
+            <a href="/planning" class="button">Consulter</a>
         </div>
 
         <div class="card">
             <h2>Voir ma liste de courses</h2>
-            <a href="/liste">Consulter</a>
+            <a href="/liste" class="button">Consulter</a>
         </div>
 
         <div class="card">
             <h2>Voir mon entraînement</h2>
-            <a href="/training">Consulter</a>
+            <a href="/training" class="button">Consulter</a>
         </div>
 
         <div class="card">
             <h2>💬 Parler à mon coach</h2>
-            <a href="/coach">Ouvrir</a>
+            <a href="/coach" class="button">Ouvrir</a>
         </div>
     </div>
 
