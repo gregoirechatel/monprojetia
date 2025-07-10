@@ -2,26 +2,40 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Accueil - Coaching IA</title>
+    <title>Accueil - Training.AI</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
             background-image: url("/static/salle.png");
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
         }
 
-        header {
-            background-color: rgba(30, 30, 30, 0.9);
-            color: #fdd835;
-            padding: 20px;
+        .logo-container {
             text-align: center;
-            font-size: 1.4em;
+            padding: 30px 0 10px;
+        }
+
+        .logo-container img {
+            width: 280px;
+            max-width: 90%;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.6));
+            animation: fadeIn 1.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .container {
@@ -30,16 +44,12 @@
             flex-wrap: wrap;
             gap: 30px;
             padding: 40px;
-            background-color: rgba(0, 0, 0, 0.7);
-            margin: 30px auto;
-            border-radius: 20px;
-            max-width: 1000px;
         }
 
         .card {
-            background-color: #1e1e1e;
+            background-color: rgba(20, 20, 20, 0.9);
             border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             padding: 30px;
             width: 260px;
             text-align: center;
@@ -63,8 +73,8 @@
             border-radius: 8px;
             display: inline-block;
             margin-top: 10px;
-            transition: background-color 0.3s;
             font-weight: bold;
+            transition: background-color 0.3s;
         }
 
         .card a:hover {
@@ -72,19 +82,19 @@
         }
 
         footer {
-            background-color: rgba(30, 30, 30, 0.8);
+            background-color: #111;
             text-align: center;
             padding: 20px;
             font-size: 14px;
-            color: #ccc;
+            color: #888;
             margin-top: 40px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Bienvenue sur ton assistant nutrition et sport IA 🧠💪</h1>
-    </header>
+    <div class="logo-container">
+        <img src="/static/logo.png" alt="Logo Training.AI">
+    </div>
 
     <div class="container">
         <div class="card">
@@ -114,7 +124,7 @@
     </div>
 
     <footer>
-        &copy; 2025 Coaching IA – Site personnel optimisé avec Claude 3 Haiku 🚀
+        &copy; 2025 Training.AI – Coach IA nutrition & sport ✨
     </footer>
 </body>
 </html>
