@@ -123,6 +123,7 @@ input:focus, select:focus {
 .planning-box pre {
     color: #0e0a0a;
 }
+
 pre {
     white-space: pre-wrap;       /* force retour ligne si trop long */
     word-wrap: break-word;       /* coupe les mots très longs si nécessaire */
