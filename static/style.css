@@ -22,7 +22,6 @@ body {
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
-    overflow-x: hidden; /* ✅ Empêche débordement horizontal */
 }
 
 /* Titres */
@@ -86,27 +85,8 @@ button:hover {
     border-radius: 10px;
     white-space: pre-wrap;
     margin-top: 20px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Fira Code', monospace;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-    overflow-x: auto;
-}
-
-/* Bloc <pre> bien contraint */
-.bloc pre,
-.planning-box pre,
-.liste-content pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    overflow-x: auto;
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-    background-color: #333;
-    color: #0e0a0a;
-    border-radius: 10px;
 }
 
 /* Groupe de boutons */
@@ -138,4 +118,15 @@ input:focus, select:focus {
     outline: none;
     border-color: #fdd835;
     box-shadow: 0 0 5px #fdd835;
+}
+
+/* Correction visibilité texte planning */
+.planning-box pre {
+    color: #0e0a0a;
+}
+
+pre {
+    white-space: pre-wrap;       /* force retour ligne si trop long */
+    word-wrap: break-word;       /* coupe les mots très longs si nécessaire */
+    overflow-wrap: break-word;   /* compatibilité */
 }
