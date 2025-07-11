@@ -22,6 +22,7 @@ body {
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+    overflow-x: hidden; /* ✅ Empêche débordement horizontal */
 }
 
 /* Titres */
@@ -87,22 +88,25 @@ button:hover {
     margin-top: 20px;
     font-family: 'Courier New', Courier, monospace;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-    overflow-x: auto; /* Ajout sécurité si jamais */
+    overflow-x: auto;
 }
 
-/* Correction visibilité texte planning */
-.planning-box pre {
-    color: #0e0a0a;
-}
-
-/* Corrige dépassements texte dans tous les blocs <pre> */
+/* Bloc <pre> bien contraint */
 .bloc pre,
 .planning-box pre,
 .liste-content pre {
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    overflow-x: auto;
+    display: block;
+    width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    background-color: #333;
+    color: #0e0a0a;
+    border-radius: 10px;
 }
 
 /* Groupe de boutons */
