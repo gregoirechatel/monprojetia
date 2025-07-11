@@ -55,9 +55,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🍽️ Planning nutritionnel hebdomadaire</h1>
-        <p>Voici ton programme généré par l’IA. Clique pour régénérer un jour spécifique si besoin :</p>
-
+        <h1> Voici ton programme généré par l’IA. Si un jour ne te conviens pas, régenère le ou dis le à ton coach IA !</h1>
+       
         {% for jour, contenu in plannings.items() %}
             <div class="day-block">
                 <h2>{{ jour|capitalize }}</h2>
@@ -69,9 +68,9 @@
         {% endfor %}
 
         <div class="actions">
-            <a href="/accueil">🏠 Accueil</a>
-            <a href="/liste">🛒 Voir la liste de courses</a>
-            <a href="/remarque">🆕 Nouvelle semaine</a>
+            <a href="/accueil"> Accueil</a>
+            <a href="/liste"> Voir la liste de courses</a>
+            <a href="/remarque"> Nouvelle semaine</a>
         </div>
     </div>
 </body>
