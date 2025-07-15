@@ -15,21 +15,15 @@
             color: #fdd835;
         }
 
-        .overlay {
-            background-color: rgba(0, 0, 0, 0.85);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-
         .logo {
             display: flex;
             justify-content: center;
-            margin-bottom: 40px;
+            margin: 60px 0 40px 0;
             animation: fadeIn 1.5s ease;
         }
 
         .logo img {
-            max-width: 250px;
+            max-width: 350px;
             filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
         }
 
@@ -39,6 +33,7 @@
             gap: 30px;
             max-width: 1100px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         .card {
@@ -89,41 +84,39 @@
     </style>
 </head>
 <body>
-    <div class="overlay">
-        <div class="logo">
-            <img src="/static/logo.png" alt="Training.AI Logo">
-        </div>
-
-        <div class="grid">
-            <div class="card">
-                <h2>Remplir le formulaire</h2>
-                <a href="/formulaire">Accéder</a>
-            </div>
-
-            <div class="card">
-                <h2>Voir mon planning nutrition</h2>
-                <a href="/planning">Consulter</a>
-            </div>
-
-            <div class="card">
-                <h2>Voir ma liste de courses</h2>
-                <a href="/liste">Consulter</a>
-            </div>
-
-            <div class="card">
-                <h2>Voir mon entraînement</h2>
-                <a href="/training">Consulter</a>
-            </div>
-
-            <div class="card">
-                <h2>💬 Parler à mon coach</h2>
-                <a href="/coach">Ouvrir</a>
-            </div>
-        </div>
-
-        <footer>
-            &copy; 2025 Training.AI – Coach IA nutrition & sport ✨
-        </footer>
+    <div class="logo">
+        <img src="/static/logo.png" alt="Training.AI Logo">
     </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Remplir le formulaire</h2>
+            <a href="/formulaire">Accéder</a>
+        </div>
+
+        <div class="card">
+            <h2>Voir mon planning nutrition</h2>
+            <a href="/planning">Consulter</a>
+        </div>
+
+        <div class="card">
+            <h2>Voir ma liste de courses</h2>
+            <a href="/liste">Consulter</a>
+        </div>
+
+        <div class="card">
+            <h2>Voir mon entraînement</h2>
+            <a href="/training">Consulter</a>
+        </div>
+
+        <div class="card">
+            <h2>💬 Parler à mon coach</h2>
+            <a href="/coach">Ouvrir</a>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 Training.AI – Coach IA nutrition & sport ✨
+    </footer>
 </body>
 </html>
