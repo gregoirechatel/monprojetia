@@ -38,7 +38,7 @@ async def register_post(request: Request, email: str = Form(...), password: str 
     user_dir = os.path.join(DATA_DIR, "utilisateurs", email)
     os.makedirs(user_dir, exist_ok=True)
 
-    response = RedirectResponse(url="/login", status_code=303)
+    response = RedirectResponse(url="/presentation", status_code=303)
     return response
 
 # Page de connexion
@@ -63,3 +63,6 @@ async def login_post(request: Request, email: str = Form(...), password: str = F
 
     # Utilisateur connecté → redirection vers vraie page d'accueil
     return RedirectResponse(url="/accueil", status_code=303)
+@router.get("/presentation", response_class=HTMLResponse)
+async def presentation(request: Request):
+    return templates.TemplateResponse("presentation.html", {"request": request})
