@@ -116,66 +116,51 @@
 
         <!-- Étape 2 -->
 <div class="step">
-    <h2>2. Ton activité physique</h2>
+  <h2>2. Ton activité physique</h2>
 
-    <label for="activite">Niveau d'activité actuel :</label>
-    <select name="activite" required>
-        <option value="très actif">Très actif</option>
-        <option value="moyennement actif">Moyennement actif</option>
-        <option value="sédentaire">Sédentaire</option>
-    </select>
+  <label for="activite">Niveau d'activité :</label>
+  <input type="text" name="activite" required><br>
 
-    <label for="sport_actuel">Sport pratiqué actuellement :</label>
-    <input type="text" name="sport_actuel" placeholder="Écris 'aucun' si aucun sport pratiqué"><br>
+  <label for="sport_actuel">Sport actuellement pratiqué :</label>
+  <input type="text" name="sport_actuel" required><br>
 
-    <label for="sport_passe">Sport pratiqué dans le passé :</label>
-    <input type="text" name="sport_passe" placeholder="Écris 'aucun' si aucun sport pratiqué"><br>
+  <label for="sport_passe">Sport pratiqué dans le passé :</label>
+  <input type="text" name="sport_passe" required><br>
 
-    <label for="objectif">Objectif actuel :</label>
-    <select name="objectif" required>
-        <option value="perte de graisse">Perte de graisse</option>
-        <option value="prise de muscle">Prise de muscle</option>
-        <option value="performance sportive">Performance sportive</option>
-    </select>
+  <label for="objectif">Ton objectif principal :</label>
+  <input type="text" name="objectif" required><br>
 
-    <label for="deja_essaye">As-tu déjà essayé d’atteindre cet objectif ?</label>
-    <select name="deja_essaye">
-        <option value="oui">Oui</option>
-        <option value="non">Non</option>
-    </select>
+  <label for="deja_essaye">As-tu déjà essayé de changer ton alimentation ?</label>
+  <input type="text" name="deja_essaye" required><br>
 
-    <label for="reussi">Si oui, as-tu réussi ?</label>
-    <select name="reussi">
-        <option value="oui">Oui</option>
-        <option value="non">Non</option>
-        <option value="première fois">Première fois que j’essaie</option>
-    </select>
+  <label for="reussi">As-tu réussi ce changement ?</label>
+  <input type="text" name="reussi" required><br>
+
+  <label for="temps_dispo">Temps dispo par jour pour le sport :</label>
+  <input type="text" name="temps_dispo" required><br>
 </div>
 
 <!-- Étape 3 -->
 <div class="step">
-    <h2>3. Ton quotidien</h2>
+  <h2>3. Ton quotidien</h2>
 
-    <label for="temps">Temps disponible par jour pour le sport (en minutes) :</label>
-    <input type="number" name="temps" required><br>
+  <label for="regime">Régime particulier :</label>
+  <input type="text" name="regime" required><br>
 
-    <label for="regime">Régime particulier (ex : vegan, sans gluten, etc.) :</label>
-    <input type="text" name="regime" placeholder="Aucun" required><br>
+  <label for="budget">Budget hebdo (€) :</label>
+  <input type="number" name="budget" required><br>
 
-    <label for="budget">Budget courses par semaine (en €) :</label>
-    <input type="number" name="budget" required><br>
+  <label for="physique">Comment décrirais-tu ton physique ?</label>
+  <input type="text" name="physique" required><br>
 
-    <label for="physique">Ton métier est-il physique ?</label>
-    <select name="physique" required>
-        <option value="oui">Oui</option>
-        <option value="non">Non</option>
-    </select><br>
+  <label for="allergies">Allergies ou intolérances ?</label>
+  <input type="text" name="allergies" required><br>
 
-    <label for="allergies">Allergies alimentaires (écris 'aucune' si tu n’en as pas) :</label>
-    <input type="text" name="allergies" required><br>
+  <label for="precision">Autres précisions :</label>
+  <textarea name="precision" rows="3" required></textarea><br>
 
-    <label for="precision">Autre chose que tu veux préciser à ton coach ?</label>
-    <input type="text" name="precision" placeholder="Ex : travaille de nuit, douleurs chroniques..."><br>
+  <label for="email">Ton email :</label>
+  <input type="email" name="email" required><br>
 </div>
 
 
