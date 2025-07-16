@@ -267,7 +267,7 @@ async def coach_action(request: Request, message: str = Form(...)):
             f"objectif = {formulaire['objectif']}, activité = {formulaire['activite']}, "
             f"régime = {formulaire['regime']}, allergies = {formulaire['allergies']}, "
             f"budget = {formulaire['budget']}€, précisions : {formulaire['precision']}.\n"
-            "Génère uniquement les repas concernés par sa demande. 3 repas par jour (matin, midi, soir) avec aliments et grammages précis. "
+            "Pour chaque jour concerné, donne uniquement 3 repas (matin, midi, soir) avec aliments + grammages. "
             "Aucune introduction, aucun blabla, format brut uniquement."
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
