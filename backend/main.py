@@ -58,18 +58,43 @@ async def afficher_training(request: Request):
     return templates.TemplateResponse("training.html", {"request": request, "training": training})
 
 @app.post("/generer", response_class=HTMLResponse)
-async def generer(request: Request, objectif: str = Form(...), age: int = Form(...),
-    poids: float = Form(...), taille: int = Form(...), sexe: str = Form(...),
-    activite: str = Form(...), email: str = Form(...)):
+async def generer(
+    request: Request,
+    age: int = Form(...),
+    poids: float = Form(...),
+    taille: int = Form(...),
+    sexe: str = Form(...),
+    activite: str = Form(...),
+    sport_actuel: str = Form(...),
+    sport_passe: str = Form(...),
+    objectif: str = Form(...),
+    deja_essaye: str = Form(...),
+    reussi: str = Form(...),
+    temps_dispo: str = Form(...),
+    regime: str = Form(...),
+    budget: str = Form(...),
+    physique: str = Form(...),
+    allergies: str = Form(...),
+    precision: str = Form(...)
+):
 
     formulaire = {
-        "objectif": objectif,
-        "age": age,
+                "age": age,
         "poids": poids,
         "taille": taille,
         "sexe": sexe,
         "activite": activite,
-        "email": email
+        "sport_actuel": sport_actuel,
+        "sport_passe": sport_passe,
+        "objectif": objectif,
+        "deja_essaye": deja_essaye,
+        "reussi": reussi,
+        "temps_dispo": temps_dispo,
+        "regime": regime,
+        "budget": budget,
+        "physique": physique,
+        "allergies": allergies,
+        "precision": precision
     } 
     os.makedirs("backend/data", exist_ok=True)  # 👈 à ajouter ici
 
@@ -81,9 +106,11 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
         prompt = (
             f"Tu es un expert en nutrition. Génére un planning pour le {jour} : "
             f"3 repas équilibrés (matin, midi, soir) avec les grammages, adaptés à un profil de "
-            f"{age} ans, {poids} kg, {taille} cm, sexe {sexe}, objectif {objectif}, activité {activite}. "
-            f"Ne fais aucune introduction ni phrase explicative. N’utilise jamais les mots glucides, lipides ou protéines."
-            f"Les repas d’un jour à l’autre ne doivent pas trop varier, mais suffisamment pour éviter l’impression de manger exactement la même chose."
+            f"{age} ans, {poids} kg, {taille} cm, sexe {sexe}, objectif {objectif}, activité {activite}, "
+            f"régime alimentaire : {regime}, allergies : {allergies}, budget hebdo : {budget}€. "
+            f"L’utilisateur a précisé : {precision}. "
+            f"Adapte les repas pour respecter le régime et éviter les allergènes. "
+            f"N’utilise pas les mots glucides, lipides ou protéines. Format : sans blabla, uniquement les repas."
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
@@ -97,7 +124,8 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
     await generer_liste_courses(plannings)
-    await generer_training(objectif, activite)
+    await generer_training(objectif, activite, sport_actuel, sport_passe, temps_dispo)
+
 
     return RedirectResponse(url="/planning", status_code=303)
 
@@ -119,20 +147,14 @@ async def generer_liste_courses(plannings: dict):
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
 
-async def generer_training(objectif: str, activite: str):
+async def generer_training(objectif: str, activite: str, sport_actuel: str, sport_passe: str, temps_dispo: str):
     prompt = (
-        f"Tu es un coach sportif. Génère un planning d'entraînement complet sur 7 jours adapté à une personne ayant comme objectif '{objectif}' "
-        f"et un niveau d’activité '{activite}'. Utilise un format clair avec un jour par ligne. Inclue un jour de repos."
+        f"Tu es un coach sportif. Génére un planning d'entraînement complet sur 7 jours adapté à une personne ayant comme objectif '{objectif}', "
+        f"niveau d’activité '{activite}', sport pratiqué actuellement : {sport_actuel}, sport pratiqué dans le passé : {sport_passe}, "
+        f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
+        f"Utilise un format clair avec un jour par ligne. Inclue un jour de repos. Ne fais pas d’intro ni d’explication."
     )
-    data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
-    try:
-        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-        contenu = response.json()["choices"][0]["message"]["content"]
-    except:
-        contenu = "Erreur génération entraînement."
 
-    with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
-        json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
 
 @app.get("/regenerer/{jour}", response_class=HTMLResponse)
 async def regenerer_jour(request: Request, jour: str):
