@@ -156,27 +156,28 @@
 <div class="step">
     <h2>3. Ton quotidien</h2>
 
-    <label for="temps_dispo">Temps disponible par jour pour le sport :</label>
-    <input type="text" name="temps_dispo" required><br>
+    <label for="temps">Temps disponible par jour pour le sport (en minutes) :</label>
+    <input type="number" name="temps" required><br>
 
-    <label for="regime">Régime particulier :</label>
-    <input type="text" name="regime" placeholder="Ex : vegan, sans gluten"><br>
+    <label for="regime">Régime particulier (ex : vegan, sans gluten, etc.) :</label>
+    <input type="text" name="regime" placeholder="Aucun" required><br>
 
-    <label for="budget">Budget courses par semaine (€) :</label>
+    <label for="budget">Budget courses par semaine (en €) :</label>
     <input type="number" name="budget" required><br>
 
-    <label for="metier_physique">As-tu un métier physique ?</label>
-    <select name="metier_physique">
+    <label for="physique">Ton métier est-il physique ?</label>
+    <select name="physique" required>
         <option value="oui">Oui</option>
         <option value="non">Non</option>
     </select><br>
 
-    <label for="allergies">Allergies :</label>
-    <input type="text" name="allergies" placeholder="Écris 'aucune' si aucune allergie"><br>
+    <label for="allergies">Allergies alimentaires (écris 'aucune' si tu n’en as pas) :</label>
+    <input type="text" name="allergies" required><br>
 
-    <label for="autre">Autre chose que tu veux préciser à ton coach :</label>
-    <textarea name="autre" rows="3" placeholder="Ex : je déteste les œufs, j’ai une vieille blessure au genou..."></textarea>
+    <label for="precision">Autre chose que tu veux préciser à ton coach ?</label>
+    <input type="text" name="precision" placeholder="Ex : travaille de nuit, douleurs chroniques..."><br>
 </div>
+
 
 <!-- Étape 4 -->
 <div class="step">
