@@ -103,7 +103,9 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
 async def generer_liste_courses(plannings: dict):
     texte_complet = "\n".join(plannings.values())
     prompt_liste = (
-        "Génère une seule liste de courses pour toute la semaine (sans séparer par jour) avec quantités et grammages précis.\n" + texte_complet
+        "Génère une seule liste de courses pour toute la semaine (sans séparer par jour) avec quantités et grammages précis. "
+        "Assure-toi que chaque ingrédient listé est présent avec un grammage total correspondant à l’addition de tous les repas des 7 jours. Aucun ingrédient ne doit être oublié.\n"
+        + texte_complet
     )
     data_courses = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt_liste}]}
     try:
@@ -114,6 +116,7 @@ async def generer_liste_courses(plannings: dict):
 
     with open(user_file_path("liste.json"), "w", encoding="utf-8") as f:
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
+
 
 async def generer_training(objectif: str, activite: str):
     prompt = (
