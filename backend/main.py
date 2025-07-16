@@ -154,6 +154,16 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
         f"Utilise un format clair avec un jour par ligne. Inclue un jour de repos. Ne fais pas d’intro ni d’explication."
     )
+    data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+    try:
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        contenu = response.json()["choices"][0]["message"]["content"]
+    except:
+        contenu = "Erreur génération entraînement."
+
+    with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
+        json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
+
 
 
 @app.get("/regenerer/{jour}", response_class=HTMLResponse)
