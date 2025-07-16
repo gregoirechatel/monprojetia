@@ -1,125 +1,163 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Accueil - Training.AI</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: url("/static/salle.png") no-repeat center center fixed;
-            background-size: cover;
-            color: #fdd835;
-        }
+  <meta charset="UTF-8">
+  <title>Accueil - Training.AI</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url("/static/salle.png") no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Montserrat', sans-serif;
+      color: #fdd835;
+    }
 
-        .logo {
-            display: flex;
-            justify-content: center;
-            margin: 60px 0 40px 0;
-            animation: fadeIn 1.5s ease;
-        }
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.8);
+      min-height: 100vh;
+      padding: 60px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      animation: fadeIn 1s ease;
+    }
 
-        .logo img {
-    max-width: 600px;
-    width: 100%;
-    height: auto;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
-}
+    .hero {
+      text-align: center;
+      max-width: 800px;
+      margin-bottom: 50px;
+    }
 
+    .hero img {
+      max-width: 500px;
+      width: 100%;
+      margin-bottom: 30px;
+      filter: drop-shadow(0 0 20px rgba(255,255,255,0.15));
+      animation: logoRise 1.5s ease;
+    }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 30px;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    .hero h1 {
+      font-size: 3em;
+      font-weight: 700;
+      margin: 0;
+      color: #fdd835;
+    }
 
-        .card {
-            background-color: rgba(40, 40, 40, 0.95);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+    .hero p {
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: #e0e0e0;
+    }
 
-        .card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.5);
-        }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 30px;
+      max-width: 1000px;
+      width: 100%;
+      margin-top: 40px;
+    }
 
-        .card h2 {
-            margin-bottom: 20px;
-            font-size: 1.4em;
-        }
+    .card {
+      background-color: rgba(30, 30, 30, 0.95);
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 
-        .card a {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #fdd835;
-            color: #1e1e1e;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 14px 25px rgba(0,0,0,0.7);
+    }
 
-        .card a:hover {
-            background-color: #ffee58;
-        }
+    .card h2 {
+      margin-bottom: 20px;
+      font-size: 1.3em;
+      color: #fdd835;
+    }
 
-        footer {
-            margin-top: 60px;
-            text-align: center;
-            color: #aaa;
-            font-size: 14px;
-        }
+    .card a {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #fdd835;
+      color: #1e1e1e;
+      font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    .card a:hover {
+      background-color: #ffee58;
+    }
+
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes logoRise {
+      from { opacity: 0; transform: translateY(-40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media screen and (max-width: 600px) {
+      .hero h1 {
+        font-size: 2em;
+      }
+      .hero p {
+        font-size: 1em;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="logo">
-        <img src="/static/logo.png" alt="Training.AI Logo">
+  <div class="overlay">
+    <div class="hero">
+      <img src="/static/logo.png" alt="Training.AI Logo">
+      <h1>Bienvenue sur Training.AI</h1>
+      <p>Ton coach personnel en nutrition et sport propulsé par l'intelligence artificielle</p>
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <h2>Remplir le formulaire</h2>
-            <a href="/formulaire">Accéder</a>
-        </div>
-
-        <div class="card">
-            <h2>Voir mon planning nutrition</h2>
-            <a href="/planning">Consulter</a>
-        </div>
-
-        <div class="card">
-            <h2>Voir ma liste de courses</h2>
-            <a href="/liste">Consulter</a>
-        </div>
-
-        <div class="card">
-            <h2>Voir mon entraînement</h2>
-            <a href="/training">Consulter</a>
-        </div>
-
-        <div class="card">
-            <h2>💬 Parler à mon coach</h2>
-            <a href="/coach">Ouvrir</a>
-        </div>
+    <div class="button-grid">
+      <div class="card">
+        <h2>Remplir le formulaire</h2>
+        <a href="/formulaire">Accéder</a>
+      </div>
+      <div class="card">
+        <h2>Voir mon planning nutrition</h2>
+        <a href="/planning">Consulter</a>
+      </div>
+      <div class="card">
+        <h2>Voir ma liste de courses</h2>
+        <a href="/liste">Consulter</a>
+      </div>
+      <div class="card">
+        <h2>Voir mon entraînement</h2>
+        <a href="/training">Consulter</a>
+      </div>
+      <div class="card">
+        <h2>💬 Parler à mon coach</h2>
+        <a href="/coach">Ouvrir</a>
+      </div>
     </div>
 
     <footer>
-        &copy; 2025 Training.AI – Coach IA nutrition & sport ✨
+      &copy; 2025 Training.AI – Coach IA nutrition & sport ✨
     </footer>
+  </div>
 </body>
 </html>
