@@ -217,9 +217,9 @@ async def coach_page(request: Request):
 
 
 @app.post("/coach", response_class=HTMLResponse)
+@app.post("/coach", response_class=HTMLResponse)
 async def coach_action(request: Request, message: str = Form(...)):
     message_lower = message.lower()
-    jour_cible = next((j for j in JOURS if j.lower() in message_lower), None)
     reponse = ""
 
     try:
@@ -228,7 +228,7 @@ async def coach_action(request: Request, message: str = Form(...)):
     except:
         return templates.TemplateResponse("coach.html", {"request": request, "reponse": "❌ Impossible de charger le formulaire utilisateur."})
 
-    # L’IA détermine si la requête concerne la nutrition ou l’entraînement
+    # 🧠 L’IA détermine si la requête concerne la nutrition ou l’entraînement
     prompt_classification = (
         f"Un utilisateur t’envoie cette requête :\n\n\"{message}\"\n\n"
         "Ta seule tâche est de dire si cela concerne l'entraînement physique ou la nutrition. "
@@ -240,6 +240,24 @@ async def coach_action(request: Request, message: str = Form(...)):
         domaine = response_class.json()["choices"][0]["message"]["content"].strip().lower()
     except:
         domaine = "nutrition"
+
+    # 🧠 L’IA détermine les jours concernés
+    prompt_jours = (
+        f"Un utilisateur t’écrit : \"{message}\"\n"
+        f"Quels jours de la semaine sont concernés par sa demande ? "
+        f"Réponds uniquement par une liste de jours clairs en français, séparés par des virgules. "
+        f"Si tous les jours sont concernés, réponds : 'tous'. Aucune autre phrase."
+    )
+    try:
+        data_jours = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt_jours}]}
+        response_jours = requests.post(CLAUDE_URL, headers=HEADERS, json=data_jours)
+        jours_texte = response_jours.json()["choices"][0]["message"]["content"].strip().lower()
+        if "tous" in jours_texte:
+            jours_mentions = JOURS
+        else:
+            jours_mentions = [j for j in JOURS if j.lower() in jours_texte]
+    except:
+        jours_mentions = JOURS
 
     if domaine == "sport":
         prompt = (
@@ -260,34 +278,30 @@ async def coach_action(request: Request, message: str = Form(...)):
         reponse = f"✅ Nouveau programme d'entraînement généré :\n\n{contenu}"
 
     else:
-        prompt = (
-            f"Tu es un expert en nutrition. Voici une demande utilisateur :\n"
-            f"{message}\n\n"
-            f"Voici son profil : {formulaire['age']} ans, {formulaire['poids']} kg, {formulaire['taille']} cm, sexe {formulaire['sexe']}, "
-            f"objectif = {formulaire['objectif']}, activité = {formulaire['activite']}, "
-            f"régime = {formulaire['regime']}, allergies = {formulaire['allergies']}, "
-            f"budget = {formulaire['budget']}€, précisions : {formulaire['precision']}.\n"
-            "Pour chaque jour concerné, donne uniquement 3 repas (matin, midi, soir) avec aliments + grammages. "
-            "Aucune introduction, aucun blabla, format brut uniquement."
-        )
-        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
-        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-        contenu = response.json()["choices"][0]["message"]["content"]
-
         with open(user_file_path("planning.json"), "r", encoding="utf-8") as f:
             data_json = json.load(f)
 
-        if jour_cible:
-            data_json["plannings"][jour_cible] = contenu
-        else:
-            for jour in JOURS:
-                data_json["plannings"][jour] = contenu
+        for jour in jours_mentions:
+            prompt = (
+                f"Tu es un expert en nutrition. Voici une demande utilisateur :\n"
+                f"{message}\n\n"
+                f"Voici son profil : {formulaire['age']} ans, {formulaire['poids']} kg, {formulaire['taille']} cm, sexe {formulaire['sexe']}, "
+                f"objectif = {formulaire['objectif']}, activité = {formulaire['activite']}, "
+                f"régime = {formulaire['regime']}, allergies = {formulaire['allergies']}, "
+                f"budget = {formulaire['budget']}€, précisions : {formulaire['precision']}.\n"
+                f"Génère uniquement les 3 repas (matin, midi, soir) avec aliments et grammages pour le jour : {jour}. "
+                "Aucune introduction, aucun blabla, format brut uniquement."
+            )
+            data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+            response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+            contenu = response.json()["choices"][0]["message"]["content"]
+            data_json["plannings"][jour] = contenu
 
         with open(user_file_path("planning.json"), "w", encoding="utf-8") as f:
             json.dump(data_json, f, ensure_ascii=False, indent=2)
 
         await generer_liste_courses(data_json["plannings"])
-        reponse = f"✅ Planning nutrition mis à jour.\n\n{contenu}"
+        reponse = f"✅ Planning nutrition mis à jour."
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
 
