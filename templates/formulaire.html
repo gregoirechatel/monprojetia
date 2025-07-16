@@ -115,25 +115,81 @@
         </div>
 
         <!-- Étape 2 -->
-        <div class="step">
-            <h2>2. Ton activité physique</h2>
-            <label for="activite">Niveau d'activité :</label>
-            <select name="activite" required>
-                <option value="sédentaire">Sédentaire</option>
-                <option value="modérée">Modérée</option>
-                <option value="intense">Intense</option>
-            </select>
-        </div>
+<div class="step">
+    <h2>2. Ton activité physique</h2>
 
-        <!-- Étape 3 -->
-        <div class="step">
-            <h2>3. Ton quotidien</h2>
-            <label for="objectif">Ton objectif :</label>
-            <input type="text" name="objectif" required><br>
+    <label for="activite">Niveau d'activité actuel :</label>
+    <select name="activite" required>
+        <option value="très actif">Très actif</option>
+        <option value="moyennement actif">Moyennement actif</option>
+        <option value="sédentaire">Sédentaire</option>
+    </select>
 
-            <label for="email">Ton email :</label>
-            <input type="email" name="email" required><br>
-        </div>
+    <label for="sport_actuel">Sport pratiqué actuellement :</label>
+    <input type="text" name="sport_actuel" placeholder="Écris 'aucun' si aucun sport pratiqué"><br>
+
+    <label for="sport_passe">Sport pratiqué dans le passé :</label>
+    <input type="text" name="sport_passe" placeholder="Écris 'aucun' si aucun sport pratiqué"><br>
+
+    <label for="objectif">Objectif actuel :</label>
+    <select name="objectif" required>
+        <option value="perte de graisse">Perte de graisse</option>
+        <option value="prise de muscle">Prise de muscle</option>
+        <option value="performance sportive">Performance sportive</option>
+    </select>
+
+    <label for="deja_essaye">As-tu déjà essayé d’atteindre cet objectif ?</label>
+    <select name="deja_essaye">
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+    </select>
+
+    <label for="reussi">Si oui, as-tu réussi ?</label>
+    <select name="reussi">
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+        <option value="première fois">Première fois que j’essaie</option>
+    </select>
+</div>
+
+<!-- Étape 3 -->
+<div class="step">
+    <h2>3. Ton quotidien</h2>
+
+    <label for="temps_dispo">Temps disponible par jour pour le sport :</label>
+    <input type="text" name="temps_dispo" required><br>
+
+    <label for="regime">Régime particulier :</label>
+    <input type="text" name="regime" placeholder="Ex : vegan, sans gluten"><br>
+
+    <label for="budget">Budget courses par semaine (€) :</label>
+    <input type="number" name="budget" required><br>
+
+    <label for="metier_physique">As-tu un métier physique ?</label>
+    <select name="metier_physique">
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+    </select><br>
+
+    <label for="allergies">Allergies :</label>
+    <input type="text" name="allergies" placeholder="Écris 'aucune' si aucune allergie"><br>
+
+    <label for="autre">Autre chose que tu veux préciser à ton coach :</label>
+    <textarea name="autre" rows="3" placeholder="Ex : je déteste les œufs, j’ai une vieille blessure au genou..."></textarea>
+</div>
+
+<!-- Étape 4 -->
+<div class="step">
+    <h2>🎯 Tu es prêt pour le progrès !</h2>
+    <p style="text-align:center; line-height: 1.6;">
+        Parfait, il faut maintenant que tu saches une chose !<br><br>
+        Ce formulaire est une base pour générer tes premiers programmes.<br>
+        Pour aller encore plus loin, pense à utiliser la page <strong>“Parler à mon coach”</strong> :<br>
+        tu peux y partager tes ressentis, poser tes questions ou demander des ajustements.<br><br>
+        Ton ressenti te sera d’ailleurs demandé chaque semaine et influencera les programmes suivants.<br><br>
+        En bref, ton coach IA va vraiment t’accompagner semaine après semaine 🧠💪
+    </p>
+</div>
 
         <!-- Navigation -->
         <div class="form-nav">
