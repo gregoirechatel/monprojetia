@@ -83,6 +83,7 @@ async def generer(request: Request, objectif: str = Form(...), age: int = Form(.
             f"3 repas équilibrés (matin, midi, soir) avec les grammages, adaptés à un profil de "
             f"{age} ans, {poids} kg, {taille} cm, sexe {sexe}, objectif {objectif}, activité {activite}. "
             f"Ne fais aucune introduction ni phrase explicative. N’utilise jamais les mots glucides, lipides ou protéines."
+            f"Les repas d’un jour à l’autre ne doivent pas trop varier, mais suffisamment pour éviter l’impression de manger exactement la même chose."
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
