@@ -152,7 +152,9 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
         f"Tu es un coach sportif. Génére un planning d'entraînement complet sur 7 jours adapté à une personne ayant comme objectif '{objectif}', "
         f"niveau d’activité '{activite}', sport pratiqué actuellement : {sport_actuel}, sport pratiqué dans le passé : {sport_passe}, "
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
-        f"Utilise un format clair avec un jour par ligne. Inclue un jour de repos. Ne fais pas d’intro ni d’explication."
+        f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. Inclue un jour de repos. Ne fais pas d’intro ni d’explication. "
+        f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour de la semaine. "
+        f"Pour chaque exercice reconnu, ajoute le lien vers sa fiche exrx.net juste après, si possible. Exemple : [https://exrx.net/WeightExercises/PectoralSternal/BBBenchPress]"
     )
     data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
     try:
@@ -163,6 +165,7 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
 
     with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
         json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
+
 
 
 
