@@ -149,16 +149,15 @@ async def generer_liste_courses(plannings: dict):
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
 
-async def generer_training(objectif: str, activite: str, sport_actuel: str, sport_passe: str, temps_dispo: str,jours_sport: str):
+async def generer_training(objectif: str, activite: str, sport_actuel: str, sport_passe: str, temps_dispo: str, jours_sport: list):
     prompt = (
-        f"Tu es un coach sportif. Génére un planning d'entraînement uniquements pour les jours suivants: {jours_sport} adapté à une personne ayant comme objectif '{objectif}', "
+        f"Tu es un coach sportif. Génére un planning d'entraînement uniquement pour les jours suivants : {', '.join(jours_sport)} adapté à une personne ayant comme objectif '{objectif}', "
         f"niveau d’activité '{activite}', sport pratiqué actuellement : {sport_actuel}, sport pratiqué dans le passé : {sport_passe}, "
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
         f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. . Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
         f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour de la semaine. "
         f"Pour chaque exercice reconnu, ajoute un lien HTML cliquable vers sa fiche sur exrx.net juste après, au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>."
         f"detaille bien les series et les repetitions si c'est necessaire"
-
     )
     data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
     try:
