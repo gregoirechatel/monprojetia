@@ -149,9 +149,12 @@ async def generer_liste_courses(plannings: dict):
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
 
-async def generer_training(objectif: str, activite: str, sport_actuel: str, sport_passe: str, temps_dispo: str, jours_sport: list):
+from typing import List
+
+async def generer_training(objectif: str, activite: str, sport_actuel: str, sport_passe: str, temps_dispo: str, jours_sport: List[str]):
+    jours_str = ', '.join(jours_sport)
     prompt = (
-        f"Tu es un coach sportif. Génére un planning d'entraînement uniquement pour les jours suivants : {', '.join(jours_sport)} adapté à une personne ayant comme objectif '{objectif}', "
+        f"Tu es un coach sportif. Génére un planning d'entraînement uniquement pour les jours suivants : {jours_str}, adapté à une personne ayant comme objectif '{objectif}', "
         f"niveau d’activité '{activite}', sport pratiqué actuellement : {sport_actuel}, sport pratiqué dans le passé : {sport_passe}, "
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
         f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. . Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
@@ -168,8 +171,6 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
 
     with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
         json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
-
-
 
 
 @app.get("/regenerer/{jour}", response_class=HTMLResponse)
