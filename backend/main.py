@@ -6,7 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import requests
-from backend.utils import user_file_path  # 👈 ajout unique
+from backend.utils import user_file_path 
+from typing import List # 👈 ajout unique
 
 load_dotenv()
 
@@ -76,7 +77,7 @@ async def generer(
     physique: str = Form(...),
     allergies: str = Form(...),
     precision: str = Form(...),
-    jours_sport: list[str] = Form(None)  # 👈 AJOUT UNIQUE
+    jours_sport: List[str] = Form(default=[])
 ):
 
     formulaire = {
@@ -149,7 +150,7 @@ async def generer_liste_courses(plannings: dict):
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
 
-from typing import List
+
 
 async def generer_training(objectif: str, activite: str, sport_actuel: str, sport_passe: str, temps_dispo: str, jours_sport: List[str]):
     jours_str = ', '.join(jours_sport)
@@ -350,12 +351,14 @@ async def post_remarque(request: Request, feedback: str = Form(...)):
 
     await generer_liste_courses(plannings)
     await generer_training(
-        formulaire["objectif"],
-        formulaire["activite"],
-        formulaire["sport_actuel"],
-        formulaire["sport_passe"],
-        formulaire["temps_dispo"]
-    )
+    formulaire["objectif"],
+    formulaire["activite"],
+    formulaire["sport_actuel"],
+    formulaire["sport_passe"],
+    formulaire["temps_dispo"],
+    formulaire["jours_sport"]
+)
+
 
     return RedirectResponse(url="/planning", status_code=303)
 
