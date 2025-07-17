@@ -320,10 +320,15 @@ async def post_remarque(request: Request, feedback: str = Form(...)):
     plannings = {}
     for jour in JOURS:
         prompt = (
-            f"Tu es un expert en nutrition. Génére un planning pour le {jour} en tenant compte de cette remarque : {feedback}. "
+            f"Tu es un expert en nutrition. Génére un planning pour le {jour} : "
             f"3 repas équilibrés (matin, midi, soir) avec les grammages, adaptés à un profil de "
             f"{formulaire['age']} ans, {formulaire['poids']} kg, {formulaire['taille']} cm, sexe {formulaire['sexe']}, "
-            f"objectif {formulaire['objectif']}, activité {formulaire['activite']}."
+            f"objectif {formulaire['objectif']}, activité {formulaire['activite']}, "
+            f"régime alimentaire : {formulaire['regime']}, allergies : {formulaire['allergies']}, budget hebdo : {formulaire['budget']}€. "
+            f"L’utilisateur a précisé : {formulaire['precision']}. "
+            f"Remarque de l’utilisateur cette semaine : {feedback}. "
+            f"Adapte les repas pour respecter le régime et éviter les allergènes. "
+            f"N’utilise pas les mots glucides, lipides ou protéines. Format : sans blabla, uniquement les repas."
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
@@ -337,9 +342,16 @@ async def post_remarque(request: Request, feedback: str = Form(...)):
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
     await generer_liste_courses(plannings)
-    await generer_training(formulaire["objectif"], formulaire["activite"])
+    await generer_training(
+        formulaire["objectif"],
+        formulaire["activite"],
+        formulaire["sport_actuel"],
+        formulaire["sport_passe"],
+        formulaire["temps_dispo"]
+    )
 
     return RedirectResponse(url="/planning", status_code=303)
+
 
 from backend import router
 app.include_router(router.router)
