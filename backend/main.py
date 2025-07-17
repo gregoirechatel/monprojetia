@@ -154,7 +154,9 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
         f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. Inclue un unique jour de repos. Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
         f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour de la semaine. "
-        f"Pour chaque exercice reconnu, ajoute le lien cliquable vers sa fiche exrx.net juste après, si possible. Exemple : [https://exrx.net/WeightExercises/PectoralSternal/BBBenchPress]"
+        f"Pour chaque exercice reconnu, ajoute un lien HTML cliquable vers sa fiche sur exrx.net juste après, au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>."
+        f"detaille bien les series et les repetitions si c'est necessaire"
+
     )
     data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
     try:
