@@ -268,30 +268,29 @@ async def coach_action(request: Request, message: str = Form(...)):
         jours_mentions = JOURS
 
     if domaine == "sport":
-        jours_formulaire = formulaire.get("jours_sport", [])
-        if isinstance(jours_formulaire, str):
-            jours_formulaire = [jours_formulaire]  # Si un seul jour
-        elif not isinstance(jours_formulaire, list):
-            jours_formulaire = []
-
-        # Fusion avec les jours détectés par l’IA dans le message
-        jours_mentions = list(set(jours_mentions + jours_formulaire))
-        jours_str = ', '.join(jours_mentions)
+        jours_sport = formulaire.get("jours_sport", [])
+        if isinstance(jours_sport, str):
+            jours_sport = [jours_sport]  # en cas de string unique
+        jours_str = ', '.join(jours_sport)
 
         prompt = (
-            f"Tu es un coach sportif. Génére un planning d'entraînement uniquement pour les jours suivants : {jours_str}, "
-            f"adapté à une personne ayant comme objectif '{formulaire['objectif']}', "
-            f"niveau d’activité '{formulaire['activite']}', sport pratiqué actuellement : {formulaire['sport_actuel']}, "
-            f"sport pratiqué dans le passé : {formulaire['sport_passe']}, "
-            f"temps disponible par jour pour s'entraîner : {formulaire['temps_dispo']} min. "
-            f"Voici la demande précise de l'utilisateur : {message} "
-            f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. Ne fais pas d’intro ni d’explication. "
-            f"Répartis équitablement entre les jours. Fais au moins 5 lignes par jour. "
-            f"Pour chaque exercice reconnu, ajoute un lien HTML cliquable vers sa fiche sur exrx.net au format : "
-            f"<a href='https://exrx.net/...'>Nom de l’exercice</a>. "
-            f"Detaille bien les séries et les répétitions si nécessaire."
+            f"Tu es un coach sportif. Génére un planning d'entraînement uniquement pour les jours suivants : {jours_str}, adapté à une personne ayant comme objectif '{formulaire['objectif']}', "
+            f"niveau d’activité '{formulaire['activite']}', sport pratiqué actuellement : {formulaire['sport_actuel']}, sport pratiqué dans le passé : {formulaire['sport_passe']}, "
+            f"temps disponible par jour pour s'entraîner : {formulaire['temps_dispo']}. "
+            f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. Ne fais pas d’intro ni d’explication. Répartis équitablement entre les jours. "
+            f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour mentionné. "
+            f"Pour chaque exercice reconnu, ajoute un lien HTML cliquable vers sa fiche sur exrx.net juste après, au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>. "
+            f"Detaille bien les séries et les répétitions si c'est nécessaire."
         )
 
+        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        contenu = response.json()["choices"][0]["message"]["content"]
+
+        with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
+            json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
+
+        reponse = f"✅ Nouveau programme d'entraînement généré :\n\n{contenu}"
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
         contenu = response.json()["choices"][0]["message"]["content"]
