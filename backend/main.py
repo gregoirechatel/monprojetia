@@ -268,13 +268,15 @@ async def coach_action(request: Request, message: str = Form(...)):
         jours_mentions = JOURS
 
     if domaine == "sport":
+        jours_str = ', '.join(jours_mentions)
         prompt = (
-            "Tu es un coach sportif. Voici une demande utilisateur :\n"
-            f"{message}\n\n"
-            f"Voici son profil : objectif = {formulaire['objectif']}, activité = {formulaire['activite']}, "
-            f"sport actuel = {formulaire['sport_actuel']}, sport passé = {formulaire['sport_passe']}, "
-            f"temps disponible par jour = {formulaire['temps_dispo']} min.\n"
-            "Génère un programme d'entraînement structuré pour la semaine, avec un jour par ligne, sans intro ni blabla."
+            f"Tu es un coach sportif. Génére un planning d'entraînement uniquement pour les jours suivants : {jours_str}, adapté à une personne ayant comme objectif '{formulaire['objectif']}', "
+            f"niveau d’activité '{formulaire['activite']}', sport pratiqué actuellement : {formulaire['sport_actuel']}, sport pratiqué dans le passé : {formulaire['sport_passe']}, "
+            f"temps disponible par jour pour s'entraîner : {formulaire['temps_dispo']}. "
+            f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. . Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
+            f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour de la semaine. "
+            f"Pour chaque exercice reconnu, ajoute un lien HTML cliquable vers sa fiche sur exrx.net juste après, au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>."
+            f"detaille bien les series et les repetitions si c'est necessaire"
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
@@ -312,6 +314,7 @@ async def coach_action(request: Request, message: str = Form(...)):
         reponse = f"✅ Planning nutrition mis à jour."
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
+
 
 @app.get("/remarque", response_class=HTMLResponse)
 async def get_remarque(request: Request):
