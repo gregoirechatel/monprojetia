@@ -160,11 +160,17 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
     try:
         response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
         contenu = response.json()["choices"][0]["message"]["content"]
+
+        # 🔧 On rend tous les liens entre crochets HTML cliquables
+        import re
+        contenu = re.sub(r'\[(https://exrx\.net/[^\]]+)\]', r'<a href="\1" target="_blank">\1</a>', contenu)
+
     except:
         contenu = "Erreur génération entraînement."
 
     with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
         json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
+
 
 
 
