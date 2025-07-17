@@ -153,30 +153,41 @@
         </div>
 
         <!-- Étape 3 -->
-        <div class="step">
-            <h2>3. Ton quotidien</h2>
+<div class="step">
+    <h2>3. Ton quotidien</h2>
 
-            <label for="temps_dispo">Temps disponible par jour pour le sport (en minutes) :</label>
-            <input type="number" name="temps_dispo" required><br>
+    <label for="temps_dispo">Temps disponible par jour pour le sport (en minutes) :</label>
+    <input type="number" name="temps_dispo" required><br>
 
-            <label for="regime">Régime particulier (ex : vegan, sans gluten, etc.) :</label>
-            <input type="text" name="regime" placeholder="Aucun" required><br>
+    <label for="regime">Régime particulier (ex : vegan, sans gluten, etc.) :</label>
+    <input type="text" name="regime" placeholder="Aucun" required><br>
 
-            <label for="budget">Budget courses par semaine (en €) :</label>
-            <input type="number" name="budget" required><br>
+    <label for="budget">Budget courses par semaine (en €) :</label>
+    <input type="number" name="budget" required><br>
 
-            <label for="physique">Ton métier est-il physique ?</label>
-            <select name="physique" required>
-                <option value="oui">Oui</option>
-                <option value="non">Non</option>
-            </select><br>
+    <label for="physique">Ton métier est-il physique ?</label>
+    <select name="physique" required>
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+    </select><br>
 
-            <label for="allergies">Allergies alimentaires (écris 'aucune' si tu n’en as pas) :</label>
-            <input type="text" name="allergies" required><br>
+    <label for="allergies">Allergies alimentaires (écris 'aucune' si tu n’en as pas) :</label>
+    <input type="text" name="allergies" required><br>
 
-            <label for="precision">Autre chose que tu veux préciser à ton coach ?</label>
-            <input type="text" name="precision" placeholder="Ex : travaille de nuit, douleurs chroniques..."><br>
-        </div>
+    <label for="precision">Autre chose que tu veux préciser à ton coach ?</label>
+    <input type="text" name="precision" placeholder="Ex : travaille de nuit, douleurs chroniques..."><br>
+
+    <h3> Quels jours peux-tu faire du sport ?</h3>
+    <div class="checkbox-group">
+        <label><input type="checkbox" name="jours_sport[]" value="Lundi"> Lundi</label>
+        <label><input type="checkbox" name="jours_sport[]" value="Mardi"> Mardi</label>
+        <label><input type="checkbox" name="jours_sport[]" value="Mercredi"> Mercredi</label>
+        <label><input type="checkbox" name="jours_sport[]" value="Jeudi"> Jeudi</label>
+        <label><input type="checkbox" name="jours_sport[]" value="Vendredi"> Vendredi</label>
+        <label><input type="checkbox" name="jours_sport[]" value="Samedi"> Samedi</label>
+        <label><input type="checkbox" name="jours_sport[]" value="Dimanche"> Dimanche</label>
+    </div>
+</div>
 
         <!-- Étape 4 -->
         <div class="step">

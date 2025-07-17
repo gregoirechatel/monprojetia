@@ -75,11 +75,12 @@ async def generer(
     budget: str = Form(...),
     physique: str = Form(...),
     allergies: str = Form(...),
-    precision: str = Form(...)
+    precision: str = Form(...),
+    jours_sport: list[str] = Form(None)  # 👈 AJOUT UNIQUE
 ):
 
     formulaire = {
-                "age": age,
+        "age": age,
         "poids": poids,
         "taille": taille,
         "sexe": sexe,
@@ -94,7 +95,8 @@ async def generer(
         "budget": budget,
         "physique": physique,
         "allergies": allergies,
-        "precision": precision
+        "precision": precision,
+        "jours_sport": jours_sport  # 👈 AJOUT UNIQUE
     } 
     os.makedirs("backend/data", exist_ok=True)  # 👈 à ajouter ici
 
@@ -124,10 +126,10 @@ async def generer(
         json.dump({"plannings": plannings}, f, ensure_ascii=False, indent=2)
 
     await generer_liste_courses(plannings)
-    await generer_training(objectif, activite, sport_actuel, sport_passe, temps_dispo)
-
+    await generer_training(objectif, activite, sport_actuel, sport_passe, temps_dispo, jours_sport)
 
     return RedirectResponse(url="/planning", status_code=303)
+
 
 async def generer_liste_courses(plannings: dict):
     texte_complet = "\n".join(plannings.values())
@@ -147,12 +149,12 @@ async def generer_liste_courses(plannings: dict):
         json.dump({"liste": liste}, f, ensure_ascii=False, indent=2)
 
 
-async def generer_training(objectif: str, activite: str, sport_actuel: str, sport_passe: str, temps_dispo: str):
+async def generer_training(objectif: str, activite: str, sport_actuel: str, sport_passe: str, temps_dispo: str,jours_sport: str):
     prompt = (
-        f"Tu es un coach sportif. Génére un planning d'entraînement complet sur 7 jours adapté à une personne ayant comme objectif '{objectif}', "
+        f"Tu es un coach sportif. Génére un planning d'entraînement uniquements pour les jours suivants: {jours_sport} adapté à une personne ayant comme objectif '{objectif}', "
         f"niveau d’activité '{activite}', sport pratiqué actuellement : {sport_actuel}, sport pratiqué dans le passé : {sport_passe}, "
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
-        f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. Inclue un unique jour de repos. Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
+        f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. . Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
         f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour de la semaine. "
         f"Pour chaque exercice reconnu, ajoute un lien HTML cliquable vers sa fiche sur exrx.net juste après, au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>."
         f"detaille bien les series et les repetitions si c'est necessaire"
