@@ -64,7 +64,7 @@
     <div class="container">
         <h1>Ton programme d'entraînement personnalisé 🏋️</h1>
         <div class="training-content">
-            <pre>{{ training }}</pre>
+            <div>{{ training | safe }}</div>
         </div>
         <a href="/accueil" class="button">Retour à l'accueil</a>
     </div>
