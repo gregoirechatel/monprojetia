@@ -236,11 +236,11 @@ async def coach_action(request: Request, message: str = Form(...)):
     except:
         return templates.TemplateResponse("coach.html", {"request": request, "reponse": "❌ Impossible de charger le formulaire utilisateur."})
 
-    # 🧠 L’IA détermine si la requête concerne la nutrition ou l’entraînement
+    # 🧠 L’IA détermine si la requête concerne la nutrition, l’entraînement ou autre
     prompt_classification = (
         f"Un utilisateur t’envoie cette requête :\n\n\"{message}\"\n\n"
-        "Ta seule tâche est de dire si cela concerne l'entraînement physique ou la nutrition. "
-        "Réponds uniquement par 'sport' ou 'nutrition' (sans phrase, sans ponctuation)."
+        "Ta seule tâche est de dire si cela concerne l'entraînement physique, la nutrition ou autre chose. "
+        "Réponds uniquement par 'sport', 'nutrition' ou 'autre' (sans phrase, sans ponctuation)."
     )
     try:
         data_classification = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt_classification}]}
@@ -291,16 +291,8 @@ async def coach_action(request: Request, message: str = Form(...)):
             json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
 
         reponse = f"✅ Nouveau programme d'entraînement généré :\n\n{contenu}"
-        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
-        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
-        contenu = response.json()["choices"][0]["message"]["content"]
 
-        with open(user_file_path("training.json"), "w", encoding="utf-8") as f:
-            json.dump({"training": contenu}, f, ensure_ascii=False, indent=2)
-
-        reponse = f"✅ Nouveau programme d'entraînement généré :\n\n{contenu}"
-
-    else:
+    elif domaine == "nutrition":
         with open(user_file_path("planning.json"), "r", encoding="utf-8") as f:
             data_json = json.load(f)
 
@@ -325,6 +317,16 @@ async def coach_action(request: Request, message: str = Form(...)):
 
         await generer_liste_courses(data_json["plannings"])
         reponse = f"✅ Planning nutrition mis à jour."
+
+    else:
+        # domaine == "autre"
+        prompt = (
+            f"Un utilisateur t’écrit :\n\n{message}\n\n"
+            "Réponds de manière pertinente à sa question, avec bienveillance et professionnalisme. Ne dis pas que tu es une IA. Pas de blabla inutile."
+        )
+        data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
+        response = requests.post(CLAUDE_URL, headers=HEADERS, json=data)
+        reponse = response.json()["choices"][0]["message"]["content"]
 
     return templates.TemplateResponse("coach.html", {"request": request, "reponse": reponse})
 
