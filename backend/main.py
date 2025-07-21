@@ -160,7 +160,8 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
         f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. . Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
         f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour de la semaine. "
-        f"Pour chaque exercice reconnu, ajoute un lien HTML cliquable vers sa fiche sur exrx.net juste après, au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>."
+        f"Pour chaque exercice que tu es certain de retrouver sur le site exrx.net, ajoute un lien HTML cliquable au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>. "
+        f"Si tu n’es pas sûr que la page existe, n’ajoute pas de lien. "
         f"detaille bien les series et les repetitions si c'est necessaire"
     )
     data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
@@ -279,7 +280,8 @@ async def coach_action(request: Request, message: str = Form(...)):
             f"temps disponible par jour pour s'entraîner : {formulaire['temps_dispo']}. "
             f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. Ne fais pas d’intro ni d’explication. Répartis équitablement entre les jours. "
             f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour mentionné. "
-            f"Pour chaque exercice reconnu, ajoute un lien HTML cliquable vers sa fiche sur exrx.net juste après, au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>. "
+            f"Pour chaque exercice que tu es certain de retrouver sur le site exrx.net, ajoute un lien HTML cliquable au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>. "
+            f"Si tu n’es pas sûr que la page existe, n’ajoute pas de lien. "
             f"Detaille bien les séries et les répétitions si c'est nécessaire."
         )
 

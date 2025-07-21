@@ -1,121 +1,153 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Bienvenue sur Training.AI</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <style>
-        body {
-            background-color: #1e1e1e;
-            font-family: Arial, sans-serif;
-            color: #fdd835;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <title>Bienvenue sur Training.AI</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
-        .slide {
-            display: none;
-            padding: 60px 20px;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        .slide.active {
-            display: block;
-        }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+      color: #fdd835;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-        .slide-content {
-            background-color: rgba(0, 0, 0, 0.85);
-            padding: 40px;
-            border-radius: 16px;
-            max-width: 800px;
-            margin: 60px auto;
-            font-size: 1.4em;
-            line-height: 1.6;
-            box-shadow: 0 0 15px rgba(255, 223, 0, 0.3);
-        }
+    .slide-container {
+      width: 90%;
+      max-width: 900px;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 50px;
+      border-radius: 24px;
+      box-shadow: 0 0 30px rgba(253, 216, 53, 0.3);
+      transition: transform 0.5s ease-in-out;
+    }
 
-        .navigation {
-            text-align: center;
-            margin-top: 30px;
-        }
+    .slide {
+      display: none;
+      animation: fadeIn 0.6s ease-in-out;
+    }
 
-        .navigation button {
-            background-color: #fdd835;
-            border: none;
-            color: #1e1e1e;
-            padding: 12px 24px;
-            font-size: 1em;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 10px;
-            font-weight: bold;
-        }
+    .slide.active {
+      display: block;
+    }
 
-        .navigation button:hover {
-            background-color: #ffee58;
-        }
-    </style>
+    .slide h2 {
+      font-size: 2.2em;
+      margin-bottom: 20px;
+      color: #fff176;
+    }
+
+    .slide p {
+      font-size: 1.25em;
+      line-height: 1.8;
+      color: #eeeeee;
+    }
+
+    .navigation {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .navigation button {
+      background-color: #fdd835;
+      border: none;
+      color: #1e1e1e;
+      padding: 14px 28px;
+      font-size: 1em;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(253, 216, 53, 0.4);
+    }
+
+    .navigation button:hover {
+      background-color: #ffee58;
+      transform: scale(1.05);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="slide-content">
-        <div class="slide active" id="slide1">
-            <h2> Félicitations !</h2>
-            <p>Vous venez de créer votre compte avec succès. Maintenant, place au progrès !</p>
-        </div>
-
-        <div class="slide" id="slide2">
-            <h2>🧠 Simplifions les choses</h2>
-            <p>Calories, apports journaliers, macronutriments... que de noms barbares 😵‍💫<br>
-            Toi, tu veux du progrès sans te prendre la tête ? Rassure-toi, tu es au bon endroit !</p>
-        </div>
-
-        <div class="slide" id="slide3">
-            <h2>🤖 Un coach IA rien que pour toi</h2>
-            <p>Sur cette plateforme, l'IA te guide et te crée des programmes adaptés à toi et à personne d'autre.<br>
-            Comme un vrai coach… sauf qu’elle se base sur les meilleures études et prend tout en compte : ton corps, ton rythme, tes objectifs.<br><br>
-            Fixe-toi un cap, et ton coach IA s’occupe du reste.<br><br><strong>Prêt à tenter l’expérience ?</strong></p>
-        </div>
+  <div class="slide-container">
+    <div class="slide active" id="slide1">
+      <h2>🎉 Félicitations !</h2>
+      <p>Vous venez de créer votre compte avec succès. Maintenant, place au progrès !</p>
     </div>
 
-    <div class="navigation">
-        <button onclick="prevSlide()">⬅️ Précédent</button>
-        <button onclick="nextSlide()">Suivant ➡️</button>
+    <div class="slide" id="slide2">
+      <h2>🧠 Simplifions les choses</h2>
+      <p>Calories, apports journaliers, macronutriments... que de noms barbares 😵‍💫<br><br>
+      Toi, tu veux du progrès sans te prendre la tête ?<br><strong>Rassure-toi, tu es au bon endroit !</strong></p>
     </div>
 
-    <script>
-        let currentSlide = 1;
-        const totalSlides = 3;
+    <div class="slide" id="slide3">
+      <h2>🤖 Un coach IA rien que pour toi</h2>
+      <p>Sur cette plateforme, l'IA te guide et te crée des programmes adaptés à toi et à personne d'autre.<br><br>
+      Comme un vrai coach… sauf qu’elle se base sur les meilleures études et prend tout en compte : ton corps, ton rythme, tes objectifs.<br><br>
+      <strong>Fixe-toi un cap, et ton coach IA s’occupe du reste.</strong><br><br>Prêt à tenter l’expérience ?</p>
+    </div>
+  </div>
 
-        function showSlide(n) {
-            document.querySelectorAll('.slide').forEach((slide, index) => {
-                slide.classList.remove('active');
-                if (index === n - 1) slide.classList.add('active');
-            });
+  <div class="navigation">
+    <button onclick="prevSlide()">⬅️ Précédent</button>
+    <button onclick="nextSlide()">Suivant ➡️</button>
+  </div>
 
-            const nextBtn = document.querySelector('.navigation button:nth-child(2)');
-            if (n === totalSlides) {
-                nextBtn.textContent = "C'est parti !";
-            } else {
-                nextBtn.textContent = "Suivant ➡️";
-            }
-        }
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 3;
 
-        function nextSlide() {
-            if (currentSlide < totalSlides) {
-                currentSlide++;
-                showSlide(currentSlide);
-            } else {
-                window.location.href = "/login";
-            }
-        }
+    function showSlide(n) {
+      document.querySelectorAll('.slide').forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index === n - 1) slide.classList.add('active');
+      });
 
-        function prevSlide() {
-            if (currentSlide > 1) {
-                currentSlide--;
-                showSlide(currentSlide);
-            }
-        }
-    </script>
+      const nextBtn = document.querySelector('.navigation button:nth-child(2)');
+      nextBtn.textContent = (n === totalSlides) ? "C'est parti !" : "Suivant ➡️";
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        showSlide(currentSlide);
+      } else {
+        window.location.href = "/login";
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        showSlide(currentSlide);
+      }
+    }
+  </script>
 
 </body>
 </html>

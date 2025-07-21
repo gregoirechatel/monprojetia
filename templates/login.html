@@ -1,23 +1,114 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Connexion</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <title>Connexion</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+      color: #fdd835;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.9);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(253, 216, 53, 0.3);
+      width: 90%;
+      max-width: 400px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #fff176;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      background-color: #333;
+      color: #fdd835;
+      outline: none;
+    }
+
+    button[type="submit"] {
+      margin-top: 25px;
+      padding: 14px;
+      background-color: #fdd835;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: bold;
+      color: #1e1e1e;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #ffee58;
+      transform: scale(1.05);
+    }
+
+    a.button {
+      display: block;
+      margin-top: 20px;
+      text-align: center;
+      color: #fdd835;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    a.button:hover {
+      color: #ffee58;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔐 Connexion</h1>
-        <form action="/login" method="post">
-            <label for="email">Email :</label>
-            <input type="email" name="email" required>
+  <div class="container">
+    <h1>🔐 Connexion</h1>
+    <form action="/login" method="post">
+      <label for="email">Email :</label>
+      <input type="email" name="email" required>
 
-            <label for="password">Mot de passe :</label>
-            <input type="password" name="password" required>
+      <label for="password">Mot de passe :</label>
+      <input type="password" name="password" required>
 
-            <button type="submit">Se connecter</button>
-        </form>
-        <a href="/" class="button">⬅️ Retour</a>
-    </div>
+      <button type="submit">Se connecter</button>
+    </form>
+    <a href="/" class="button">⬅️ Retour</a>
+  </div>
 </body>
 </html>
+
