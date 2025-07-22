@@ -235,20 +235,20 @@ async def coach_action(request: Request, message: str = Form(...)):
         with open(user_file_path("formulaire.json"), "r", encoding="utf-8") as f:
             formulaire = json.load(f)
     except:
-        return templates.TemplateResponse("coach.html", {"request": request, "reponse": "❌ Impossible de charger le formulaire utilisateur."})
+        return templates.TemplateResponse("coach.html", {"request": request, "reponse": "NB: il faut remplir le formulaire avant de parler à ton coach"})
 
-    # 🧠 L’IA détermine si la requête concerne la nutrition, l’entraînement ou autre
+    
     prompt_classification = (
         f"Un utilisateur t’envoie cette requête :\n\n\"{message}\"\n\n"
-        "Ta seule tâche est de dire si cela concerne l'entraînement physique, la nutrition ou autre chose. "
-        "Réponds uniquement par 'sport', 'nutrition' ou 'autre' (sans phrase, sans ponctuation)."
+        "Ta seule tâche est de dire si cela concerne une demande de modificatiion du planing d'entrainement, une demande de modification du planing de nutrition ou une question n'amenant pas à des modification à laquelle répondre simplement "
+        "Réponds uniquement par 'modifsport', 'modifnutrition' ou 'nomodif' (sans phrase, sans ponctuation)."
     )
     try:
         data_classification = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt_classification}]}
         response_class = requests.post(CLAUDE_URL, headers=HEADERS, json=data_classification)
         domaine = response_class.json()["choices"][0]["message"]["content"].strip().lower()
     except:
-        domaine = "nutrition"
+        domaine = "modifnutrition"
 
     # 🧠 L’IA détermine les jours concernés
     prompt_jours = (
@@ -268,7 +268,7 @@ async def coach_action(request: Request, message: str = Form(...)):
     except:
         jours_mentions = JOURS
 
-    if domaine == "sport":
+    if domaine == "modifsport":
         jours_sport = formulaire.get("jours_sport", [])
         if isinstance(jours_sport, str):
             jours_sport = [jours_sport]  # en cas de string unique
@@ -294,7 +294,7 @@ async def coach_action(request: Request, message: str = Form(...)):
 
         reponse = f"✅ Nouveau programme d'entraînement généré :\n\n{contenu}"
 
-    elif domaine == "nutrition":
+    elif domaine == "modifnutrition":
         with open(user_file_path("planning.json"), "r", encoding="utf-8") as f:
             data_json = json.load(f)
 
@@ -321,7 +321,7 @@ async def coach_action(request: Request, message: str = Form(...)):
         reponse = f"✅ Planning nutrition mis à jour."
 
     else:
-        # domaine == "autre"
+        # domaine == "nomodif"
         prompt = (
             f"Un utilisateur t’écrit :\n\n{message}\n\n"
             "Réponds de manière pertinente à sa question, avec bienveillance et professionnalisme. Ne dis pas que tu es une IA. Pas de blabla inutile."
