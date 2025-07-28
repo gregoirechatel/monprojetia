@@ -135,7 +135,7 @@ async def generer(
 async def generer_liste_courses(plannings: dict):
     texte_complet = "\n".join(plannings.values())
     prompt_liste = (
-        "Génère une seule liste de courses pour toute la semaine (sans séparer par jour) avec quantités et grammages précis. "
+        "Génère une seule liste de courses pour toute la semaine (sans séparer par jour) avec quantités et grammages précis.Organise la de maniere intelligente pour un max de visibilité en rassemblant les aliments de meme nature (ex: legumes:) "
         "Assure-toi que chaque ingrédient listé est présent avec un grammage total correspondant à l’addition de tous les repas des 7 jours. Aucun ingrédient ne doit être oublié.\n"
         + texte_complet
     )
