@@ -239,7 +239,8 @@ async def coach_action(request: Request, message: str = Form(...)):
     
     prompt_classification = (
         f"Un utilisateur t’envoie cette requête :\n\n\"{message}\"\n\n"
-        "Ta seule tâche est de dire si cela concerne une demande de modificatiion du planing d'entrainement, une demande de modification du planing de nutrition ou une question n'amenant pas à des modification à laquelle répondre simplement "
+        "Ta seule tâche est de dire si cela concerne une demande de modificatiion du planing d'entrainement, une demande de modification du planing de nutrition ou une question n'amenant pas à des modification à laquelle répondre simplement, pour determiner cela ne te base pas sur les mots clés mais reflechis vraiment si l utilisateur cherche une demande de modification ou simplement des infos, par exemple une question de nutrition ou de sport peut etre posée à titre informtif sans attendre de changement dans le planing"
+       
         "Réponds uniquement par 'modifsport', 'modifnutrition' ou 'nomodif' (sans phrase, sans ponctuation)."
     )
     try:
