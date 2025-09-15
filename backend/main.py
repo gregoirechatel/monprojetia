@@ -281,7 +281,7 @@ async def coach_action(request: Request, message: str = Form(...)):
             f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour mentionné. "
             f"Pour chaque exercice que tu es certain de retrouver sur le site exrx.net, ajoute un lien HTML cliquable au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>. "
             f"Si tu n’es pas sûr que la page existe, n’ajoute pas de lien. "
-            f"Detaille bien les séries et les répétitions si c'est nécessaire."
+            f"Detaile bien les séries et les répétitions si c'est nécessaire."
         )
 
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
