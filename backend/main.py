@@ -276,6 +276,7 @@ async def coach_action(request: Request, message: str = Form(...)):
 
         prompt = (
             f"Tu es un coach sportif. Génére un planning d'entraînement uniquement pour les jours suivants : {jours_str}, adapté à une personne ayant comme objectif '{formulaire['objectif']}', "
+            f"{message}\n\n"
             f"niveau d’activité '{formulaire['activite']}', sport pratiqué actuellement : {formulaire['sport_actuel']}, sport pratiqué dans le passé : {formulaire['sport_passe']}, "
             f"temps disponible par jour pour s'entraîner : {formulaire['temps_dispo']}. "
             f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. Ne fais pas d’intro ni d’explication. Répartis équitablement entre les jours. "
