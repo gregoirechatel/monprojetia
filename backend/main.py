@@ -114,6 +114,7 @@ async def generer(
             f"L’utilisateur a précisé : {precision}. "
             f"Adapte les repas pour respecter le régime et éviter les allergènes. "
             f"N’utilise pas les mots glucides, lipides ou protéines. Format : sans blabla, uniquement les repas."
+            f"essaye d utiliser des ingredients relativement simples, pas cher, faciles à trouver et connus mais maintien tout de meme une diversité selon les jours de la semaine, pour manger varier mais limiter la friction due aux aliments, evite par exemple le tofu ou les graines de chia"
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
@@ -160,7 +161,7 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
         f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. . Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
         f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour de la semaine. "
-        f"Pour chaque exercice que tu es certain de retrouver sur le site exrx.net, ajoute un lien HTML cliquable au format : <a href='https://exrx.net/...'>Nom de l’exercice</a>. Si tu n’es pas sûr que la page existe, n’ajoute pas de lien.verifie bien avant il faut absolument que ça marche "
+        f"Pour eviter les malentendus, trouve un lien sur le web montrant une animation de l exercice, pour avoir un aperçu visuel, je te laisse la liberté du site du moment que ça marche "
         f"detaille bien les series et les repetitions si c'est necessaire"
     )
     data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
@@ -358,6 +359,7 @@ async def post_remarque(request: Request, feedback: str = Form(...)):
             f"Remarque de l’utilisateur cette semaine : {feedback}. "
             f"Adapte les repas pour respecter le régime et éviter les allergènes. "
             f"N’utilise pas les mots glucides, lipides ou protéines. Format : sans blabla, uniquement les repas."
+            f"essaye d utiliser des ingredients relativement simples, pas cher, faciles à trouver et connus mais maintien tout de meme une diversité selon les jours de la semaine, pour manger varier mais limiter la friction due aux aliments, evite par exemple le tofu ou les graines de chia"
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
