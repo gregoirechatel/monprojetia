@@ -46,7 +46,7 @@ async def afficher_liste(request: Request):
         with open(user_file_path("liste.json"), "r", encoding="utf-8") as f:
             liste = json.load(f)["liste"]
     except:
-        liste = "Aucune liste trouvée."
+        liste = "Rendez vous d'abord à l'étape 1 😉"
     return templates.TemplateResponse("liste.html", {"request": request, "liste": liste})
 
 @app.get("/training", response_class=HTMLResponse)
@@ -55,7 +55,7 @@ async def afficher_training(request: Request):
         with open(user_file_path("training.json"), "r", encoding="utf-8") as f:
             training = json.load(f)["training"]
     except:
-        training = "Aucun planning trouvé."
+        training = "Rendez vous d'abord à l'étape 1 😉"
     return templates.TemplateResponse("training.html", {"request": request, "training": training})
 
 @app.post("/generer", response_class=HTMLResponse)
@@ -238,7 +238,7 @@ async def coach_action(request: Request, message: str = Form(...)):
         with open(user_file_path("formulaire.json"), "r", encoding="utf-8") as f:
             formulaire = json.load(f)
     except:
-        return templates.TemplateResponse("coach.html", {"request": request, "reponse": "NB: il faut remplir le formulaire avant de parler à ton coach"})
+        return templates.TemplateResponse("coach.html", {"request": request, "reponse": "Rendez vous d'abord à l'étape 1 😉"})
 
     
     prompt_classification = (
@@ -348,7 +348,7 @@ async def post_remarque(request: Request, feedback: str = Form(...)):
         with open(user_file_path("formulaire.json"), "r", encoding="utf-8") as f:
             formulaire = json.load(f)
     except:
-        return templates.TemplateResponse("remarque.html", {"request": request, "erreur": "❌ Formulaire manquant"})
+        return templates.TemplateResponse("remarque.html", {"request": request, "erreur": "Rendez vous d'abord à l'étape 1 😉"})
 
     plannings = {}
     for jour in JOURS:
