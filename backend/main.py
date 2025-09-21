@@ -115,6 +115,7 @@ async def generer(
             f"Adapte les repas pour respecter le régime et éviter les allergènes. "
             f"N’utilise pas les mots glucides, lipides ou protéines. Format : sans blabla, uniquement les repas."
             f"essaye d utiliser des ingredients relativement simples, pas cher, faciles à trouver et connus mais maintien tout de meme une diversité selon les jours de la semaine, pour manger varier mais limiter la friction due aux aliments, evite par exemple le tofu ou les graines de chia"
+            f"le budget est primordial, prens bien en compte {budget} et assure toi que ce qui est dépensé dans la semaine en nourriture ne dépasse en aucun cas ce montant en euros, base toi sur le prix moyen des aliments en france en euros"
         )
         data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
         try:
@@ -161,7 +162,7 @@ async def generer_training(objectif: str, activite: str, sport_actuel: str, spor
         f"temps disponible par jour pour s'entraîner : {temps_dispo}. "
         f"Detaille bien chaque exercice, pour une séance structurée dans un ordre précis. . Ne fais pas d’intro ni d’explication.répartis equitablement entre les jours"
         f"Fais au moins 5 lignes par jour pour que ce soit bien détaillé, pour chaque jour de la semaine. "
-        f"Pour eviter les malentendus, trouve un lien sur le web montrant une animation de l exercice, pour avoir un aperçu visuel, je te laisse la liberté du site du moment que ça marche "
+        f"Pour eviter les malentendus, trouve un lien sur le web montrant une animation de l exercice, pour avoir un aperçu visuel, je te laisse la liberté du site du moment que ça marche, mets le lien en cliquable directement "
         f"detaille bien les series et les repetitions si c'est necessaire"
     )
     data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
@@ -196,6 +197,8 @@ async def regenerer_jour(request: Request, jour: str):
         f"L’utilisateur a précisé : {formulaire['precision']}. "
         f"Adapte les repas pour respecter le régime et éviter les allergènes. "
         f"N’utilise pas les mots glucides, lipides ou protéines. Format : sans blabla, uniquement les repas."
+        f"essaye d utiliser des ingredients relativement simples, pas cher, faciles à trouver et connus mais maintien tout de meme une diversité selon les jours de la semaine, pour manger varier mais limiter la friction due aux aliments, evite par exemple le tofu ou les graines de chia"
+        f"le budget est primordial, prens bien en compte {formulaire['budget']}€ et assure toi que ce qui est dépensé  en nourriture ne dépasse en aucun cas ce montant en euros, base toi sur le prix moyen des aliments en france en euros"
     )
 
     data = {"model": "anthropic/claude-3-haiku", "messages": [{"role": "user", "content": prompt}]}
