@@ -74,9 +74,16 @@
       box-shadow: 0 4px 10px rgba(253, 216, 53, 0.4);
     }
 
-    .navigation button:hover {
+    .navigation button:hover:enabled {
       background-color: #ffee58;
       transform: scale(1.05);
+    }
+
+    .navigation button:disabled {
+      background-color: #9e9e9e;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     @keyframes fadeIn {
@@ -100,27 +107,37 @@
     </div>
 
     <div class="slide" id="slide2">
-      <h2>🧠 Simplifions les choses</h2>
+      <h2> Simplifions les choses</h2>
       <p>Calories, apports journaliers, macronutriments... que de noms barbares 😵‍💫<br><br>
       Toi, tu veux du progrès sans te prendre la tête ?<br><strong>Rassure-toi, tu es au bon endroit !</strong></p>
     </div>
 
     <div class="slide" id="slide3">
-      <h2>🤖 Un coach IA rien que pour toi</h2>
+      <h2> Un assistant IA rien que pour toi</h2>
       <p>Sur cette plateforme, l'IA te guide et te crée des programmes adaptés à toi et à personne d'autre.<br><br>
       Comme un vrai coach… sauf qu’elle se base sur les meilleures études et prend tout en compte : ton corps, ton rythme, tes objectifs.<br><br>
       <strong>Fixe-toi un cap, et ton coach IA s’occupe du reste.</strong><br><br>Prêt à tenter l’expérience ?</p>
+    </div>
+
+    <div class="slide" id="slide4">
+      <h2>⚠️ Disclaimer</h2>
+      <p>Cet outil est généré par intelligence artificielle et fourni à titre informatif. 
+      Il ne remplace en aucun cas un avis médical, un suivi diététique ou un accompagnement par un professionnel de santé diplômé.<br><br>
+      En continuant, vous reconnaissez être seul responsable de vos choix alimentaires et sportifs.</p>
+      <label style="font-size:1.1em; color:#eeeeee;">
+        <input type="checkbox" id="acceptDisclaimer"> J’ai lu et j’accepte les conditions d’utilisation
+      </label>
     </div>
   </div>
 
   <div class="navigation">
     <button onclick="prevSlide()">⬅️ Précédent</button>
-    <button onclick="nextSlide()">Suivant ➡️</button>
+    <button onclick="nextSlide()" id="nextBtn">Suivant ➡️</button>
   </div>
 
   <script>
     let currentSlide = 1;
-    const totalSlides = 3;
+    const totalSlides = 4;
 
     function showSlide(n) {
       document.querySelectorAll('.slide').forEach((slide, index) => {
@@ -128,8 +145,19 @@
         if (index === n - 1) slide.classList.add('active');
       });
 
-      const nextBtn = document.querySelector('.navigation button:nth-child(2)');
-      nextBtn.textContent = (n === totalSlides) ? "C'est parti !" : "Suivant ➡️";
+      const nextBtn = document.getElementById('nextBtn');
+      if (n === totalSlides) {
+        nextBtn.textContent = "C'est parti !";
+        // Désactiver le bouton tant que la case n’est pas cochée
+        const checkbox = document.getElementById('acceptDisclaimer');
+        nextBtn.disabled = !checkbox.checked;
+        checkbox.addEventListener('change', () => {
+          nextBtn.disabled = !checkbox.checked;
+        });
+      } else {
+        nextBtn.textContent = "Suivant ➡️";
+        nextBtn.disabled = false;
+      }
     }
 
     function nextSlide() {
